@@ -11,9 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
-using System.ComponentModel;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace Api.Extensions
 {
@@ -39,12 +37,15 @@ namespace Api.Extensions
 		private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.AddScoped<IUserService, UserService>();
+			services.AddScoped<ISubscriptionService, SubscriptionService>();
 			services.AddScoped<IJwtService, JwtService>();
 			services.AddScoped<PasswordHasher<UserEntity>>();
 			services.AddAutoMapper(cfg =>
 			{
 				cfg.AddProfile<UserProfile>();
 				cfg.AddProfile<UserDtoProfile>();
+				cfg.AddProfile<SubscriptionProfile>();
+				cfg.AddProfile<SubscriptionDtoProfile>();
 			});
 
 			return services;
@@ -66,6 +67,7 @@ namespace Api.Extensions
 
 			services.AddScoped<IMongoDbContext, MongoDbContext>();
 			services.AddScoped<IUserRepository, UserRepository>();
+			services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
 			return services;
 		}

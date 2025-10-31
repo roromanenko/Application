@@ -15,6 +15,7 @@ namespace Infrastructure.Persistence.Entity
 
 		[BsonRequired]
 		public string PasswordHash { get; set; } = string.Empty;
+
 		public List<string> Roles { get; set; } = [];
 	}
 }
