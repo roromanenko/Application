@@ -1,0 +1,109 @@
+# === OS and General ===
+.DS_Store
+Thumbs.db
+
+# === Visual Studio / MSBuild ===
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+_ReSharper*/
+*.DotSettings.user
+.idea/
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# NCrunch / CodeRush / StyleCop / Sonar
+.ncrunchsolution
+.nCrunchTemp_*
+*.ncrunchproject
+.cr/
+StyleCop.Cache
+.sonar/
+.sonarqube/
+.scannerwork/
+
+# === .NET build output ===
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+*.log
+
+artifacts/
+publish/
+**/PublishOutput/
+**/out/
+
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+.coverage
+.coveragexml
+
+# === NuGet ===
+packages/
+*.nupkg
+*.snupkg
+# NuGet.exe
+.nuget/NuGet.exe
+
+# === ASP.NET Core ===
+appsettings.*.local.json
+appsettings.local.json
+*.Secrets.json
+
+# Launch profiles
+*.pubxml.user
+*.pubxml~*
+Properties/ServiceDependencies/
+Properties/ServiceDependencies.local.json
+**/launchSettings.json.user
+
+# === Entity Framework ===
+**/Migrations/*.Designer.cs.user
+**/Migrations/*_Backup*/
+
+# === Frontend в составе ASP.NET Core (SPA/LibMan) ===
+node_modules/
+bower_components/
+wwwroot/lib/
+libman.cache.json
+
+# === Docker ===
+**/obj/Docker/
+**/obj/**/Docker/*.*
+docker-compose.*.override.yml.local
+
+# === Rider DotCover / JetBrains ===
+.idea/.idea.*
+.idea/.fleet/
+**/.idea/.gitignore
+**/.idea/**/workspace.xml
+**/.idea/**/tasks.xml
+**/.idea/**/dictionaries
+**/.idea/**/shelf/
+
+# === dotnet ===
+.tools/
+.dotnet/
+.ionide/
+
+# === Additional ===
+*.tmp
+*.temp
+*.bak
+*.orig
+*.swp
+*.swo
+*.~*
+
+# === CI ===
+*.tgz
+*.zip
+*.tar
