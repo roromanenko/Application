@@ -107,3 +107,33 @@ docker-compose.*.override.yml.local
 *.tgz
 *.zip
 *.tar
+
+# === Angular ===
+# Angular CLI build output
+dist/
+dist-ssr/
+.angular/
+.angular/cache/
+
+# Dependencies
+Frontend/node_modules/
+
+# Environment files (если есть приватные ключи)
+Frontend/src/environments/environment*.ts
+
+# Temporary build/test files
+Frontend/.angular/
+Frontend/.angular/cache/
+Frontend/.scannerwork/
+Frontend/coverage/
+Frontend/.firebase/
+Frontend/.npm/
+Frontend/npm-debug.log*
+Frontend/yarn-error.log*
+Frontend/package-lock.json
+Frontend/.DS_Store
+
+# IDE/Editor
+Frontend/.idea/
+Frontend/.vscode/
+Frontend/.fleet/
