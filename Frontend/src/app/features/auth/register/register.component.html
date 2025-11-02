@@ -1,0 +1,118 @@
+<section class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1>Create Account</h1>
+      <p>Join us to start organizing amazing events</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName"
+                 name="firstName"
+                 [(ngModel)]="firstName"
+                 type="text"
+                 placeholder="John"
+                 required
+                 #firstNameField="ngModel"
+                 class="form-input" />
+          <span class="error-message" *ngIf="firstNameField.invalid && firstNameField.touched">
+            First name is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName"
+                 name="lastName"
+                 [(ngModel)]="lastName"
+                 type="text"
+                 placeholder="Doe"
+                 required
+                 #lastNameField="ngModel"
+                 class="form-input" />
+          <span class="error-message" *ngIf="lastNameField.invalid && lastNameField.touched">
+            Last name is required
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username"
+               name="username"
+               [(ngModel)]="username"
+               type="text"
+               placeholder="johndoe123"
+               required
+               minlength="3"
+               #usernameField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="usernameField.invalid && usernameField.touched">
+          <span *ngIf="usernameField.errors?.['required']">Username is required</span>
+          <span *ngIf="usernameField.errors?.['minlength']">Username must be at least 3 characters</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email"
+               name="email"
+               [(ngModel)]="email"
+               type="email"
+               placeholder="john@example.com"
+               required
+               email
+               #emailField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="emailField.invalid && emailField.touched">
+          <span *ngIf="emailField.errors?.['required']">Email is required</span>
+          <span *ngIf="emailField.errors?.['email']">Please enter a valid email</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password"
+               name="password"
+               [(ngModel)]="password"
+               type="password"
+               placeholder="••••••••"
+               required
+               minlength="6"
+               #passwordField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="passwordField.invalid && passwordField.touched">
+          <span *ngIf="passwordField.errors?.['required']">Password is required</span>
+          <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword"
+               name="confirmPassword"
+               [(ngModel)]="confirmPassword"
+               type="password"
+               placeholder="••••••••"
+               required
+               #confirmPasswordField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="confirmPasswordField.touched && password !== confirmPassword && confirmPassword.length > 0">
+          Passwords do not match
+        </span>
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary btn-full"
+              [disabled]="registerForm.invalid || password !== confirmPassword">
+        Create Account
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login" class="link">Sign in</a></p>
+    </div>
+  </div>
+</section>

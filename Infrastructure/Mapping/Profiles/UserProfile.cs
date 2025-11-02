@@ -14,6 +14,9 @@ namespace Infrastructure.Mapping.Profiles
 				{
 					Id = ObjectId.Parse(u.Id),
 					Username = u.Username,
+					Email = u.Email,
+					FirstName = u.FirstName,
+					LastName = u.LastName,
 					PasswordHash = u.PasswordHash,
 					Roles = u.Roles.ToList()
 				});
@@ -23,6 +26,9 @@ namespace Infrastructure.Mapping.Profiles
 			{
 				Id = e.Id.ToString(),
 				Username = e.Username,
+				Email = e.Email,
+				FirstName = e.FirstName,
+				LastName = e.LastName,
 				PasswordHash = e.PasswordHash,
 				Roles = e.Roles.ToList()
 			});

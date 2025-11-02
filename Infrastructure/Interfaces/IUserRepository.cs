@@ -11,7 +11,7 @@ namespace Infrastructure.Interfaces
 	public interface IUserRepository
 	{
 		Task<UserEntity> CreateUser(UserEntity newUser);
-		Task<UserEntity> GetUserByUsername(string username);
+		Task<UserEntity> GetUserByUsernameOrEmail(string usernameOrEmail);
 		Task<UserEntity> GetUserById(ObjectId userid);
 		Task UpdateUser(UserEntity user);
 		Task ChangePassword(ObjectId userId, string newPasswordHash);

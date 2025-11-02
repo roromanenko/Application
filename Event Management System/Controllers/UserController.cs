@@ -32,7 +32,7 @@ namespace Api.Controllers
 				if (request.Password != request.ConfirmPassword)
 					return Ok(new ApiResponse<UserDto>(false, "Passwords do not match"));
 
-				var user = await _userService.RegisterUser(request.Username, request.Password);
+				var user = await _userService.RegisterUser(request.Username, request.Email, request.FirstName, request.LastName, request.Password);
 
 				var response = _mapper.Map<UserDto>(user);
 				return Ok(new ApiResponse<UserDto>(true, "User registered successfully", response));
@@ -50,7 +50,7 @@ namespace Api.Controllers
 		[HttpPost("login")]
 		public async Task<ActionResult<ApiResponse<LoginResponse>>> Login(LoginRequest request)
 		{
-			var user = await _userService.VerifyUserLogin(request.Username, request.Password);
+			var user = await _userService.VerifyUserLogin(request.UsernameOrEmail, request.Password);
 			if (user == null)
 				return Ok(new ApiResponse<LoginResponse>(false, "Invalid credentials"));
 

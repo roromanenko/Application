@@ -25,9 +25,12 @@ namespace Infrastructure.Persistence.Repositories
 			return newUser;
 		}
 
-		public async Task<UserEntity> GetUserByUsername(string username)
+		public async Task<UserEntity> GetUserByUsernameOrEmail(string usernameOrEmail)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Username, username);
+			var filter = Builders<UserEntity>.Filter.Or(
+				Builders<UserEntity>.Filter.Eq(u => u.Username, usernameOrEmail),
+				Builders<UserEntity>.Filter.Eq(u => u.Email, usernameOrEmail)
+			);
 			var user = await _dbContext.GetCollection<UserEntity>().Find(filter).FirstOrDefaultAsync();
 
 			return user;

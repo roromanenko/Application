@@ -4,6 +4,8 @@
 	(
 		string Id,
 		string Username,
+		string FirstName,
+		string LastName,
 		IEnumerable<string> Roles
 	);
 }

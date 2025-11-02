@@ -1,0 +1,66 @@
+<section class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your account to continue</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="auth-form">
+      <div class="form-group">
+        <label for="username">Username or Email</label>
+        <input id="username"
+               name="username"
+               [(ngModel)]="username"
+               type="text"
+               placeholder="Enter your username or email"
+               required
+               #usernameField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="usernameField.invalid && usernameField.touched">
+          Username or email is required
+        </span>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label for="password">Password</label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <input id="password"
+               name="password"
+               [(ngModel)]="password"
+               type="password"
+               placeholder="Enter your password"
+               required
+               minlength="6"
+               #passwordField="ngModel"
+               class="form-input" />
+        <span class="error-message" *ngIf="passwordField.invalid && passwordField.touched">
+          <span *ngIf="passwordField.errors?.['required']">Password is required</span>
+          <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
+        </span>
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          <span>Remember me</span>
+        </label>
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary btn-full"
+              [disabled]="loginForm.invalid">
+        Sign In
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register" class="link">Sign up</a></p>
+    </div>
+  </div>
+</section>

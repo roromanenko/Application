@@ -4,7 +4,7 @@
       <span class="logo-text">Event<span class="logo-accent">Manager</span></span>
     </a>
     <div class="nav-links">
-      <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+      <a *ngIf="!isLoggedIn" routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
       <a routerLink="/events" class="nav-link" routerLinkActive="active">Events</a>
       <a *ngIf="isLoggedIn" routerLink="/calendar" class="nav-link" routerLinkActive="active">Calendar</a>
     </div>

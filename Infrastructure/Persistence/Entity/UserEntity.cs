@@ -14,6 +14,15 @@ namespace Infrastructure.Persistence.Entity
 		public string Username { get; set; } = string.Empty;
 
 		[BsonRequired]
+		public string Email { get; set; } = string.Empty;
+
+		[BsonRequired]
+		public string FirstName { get; set; } = string.Empty;
+
+		[BsonRequired]
+		public string LastName { get; set; } = string.Empty;
+
+		[BsonRequired]
 		public string PasswordHash { get; set; } = string.Empty;
 
 		public List<string> Roles { get; set; } = [];

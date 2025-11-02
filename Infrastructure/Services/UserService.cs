@@ -21,9 +21,9 @@ namespace Infrastructure.Services
 			_mapper = mapper;
 		}
 
-		public async Task<User?> VerifyUserLogin(string username, string password)
+		public async Task<User?> VerifyUserLogin(string usernameOrEmail, string password)
 		{
-			var userEntity = await _userRepository.GetUserByUsername(username);
+			var userEntity = await _userRepository.GetUserByUsernameOrEmail(usernameOrEmail);
 			if (userEntity is null)
 			{
 				return default;
@@ -38,17 +38,20 @@ namespace Infrastructure.Services
 			return default;
 		}
 
-		public async Task<User> RegisterUser(string username, string password)
+		public async Task<User> RegisterUser(string username, string email, string firstName, string lastName, string password)
 		{
-			var userEntity = await _userRepository.GetUserByUsername(username);
+			var userEntity = await _userRepository.GetUserByUsernameOrEmail(username);
 			if (userEntity != null)
 			{
-				throw new ArgumentException("User with this username already exists");
+				throw new ArgumentException("User with this username or email already exists");
 			}
 
 			var newUser = new UserEntity
 			{
 				Username = username,
+				Email = email,
+				FirstName = firstName,
+				LastName = lastName,
 				Roles = ["user"]
 			};
 			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
