@@ -3,22 +3,34 @@
     <a routerLink="/" class="logo">
       <span class="logo-text">Event<span class="logo-accent">Manager</span></span>
     </a>
+
     <div class="nav-links">
-      <a *ngIf="!isLoggedIn" routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+      <a *ngIf="!(isLoggedIn$ | async)"
+         routerLink="/"
+         class="nav-link"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">Home</a>
+
       <a routerLink="/events" class="nav-link" routerLinkActive="active">Events</a>
-      <a *ngIf="isLoggedIn" routerLink="/calendar" class="nav-link" routerLinkActive="active">Calendar</a>
+
+      <a *ngIf="isLoggedIn$ | async"
+         routerLink="/calendar"
+         class="nav-link"
+         routerLinkActive="active">Calendar</a>
     </div>
   </div>
+
   <div class="nav-right">
     <!-- Non-authenticated -->
-    <ng-container *ngIf="!isLoggedIn; else loggedInMenu">
+    <ng-container *ngIf="!(isLoggedIn$ | async); else loggedInMenu">
       <a routerLink="/login" class="btn btn-login">Login</a>
       <a routerLink="/register" class="btn btn-register">Get Started</a>
     </ng-container>
+
     <!-- Authenticated -->
     <ng-template #loggedInMenu>
       <div class="profile-menu">
-        <button class="profile-button">
+        <button class="profile-button" (click)="logout()">
           <img src="assets/profile-icon.svg" alt="Profile" class="profile-icon" />
           <span class="profile-name">John Doe</span>
         </button>

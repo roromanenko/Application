@@ -1,0 +1,121 @@
+$success-green: #10B981;
+$error-red: #EF4444;
+$info-blue: #3B82F6;
+$warning-orange: #F59E0B;
+$white: #ffffff;
+$black: #0D0D0D;
+
+$font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+.notification-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+
+  @media (max-width: 568px) {
+    left: 20px;
+    right: 20px;
+    max-width: none;
+  }
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: $white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+  font-family: $font-primary;
+
+  &.success {
+    border-left-color: $success-green;
+
+    .notification-icon {
+      color: $success-green;
+    }
+  }
+
+  &.error {
+    border-left-color: $error-red;
+
+    .notification-icon {
+      color: $error-red;
+    }
+  }
+
+  &.info {
+    border-left-color: $info-blue;
+
+    .notification-icon {
+      color: $info-blue;
+    }
+  }
+
+  &.warning {
+    border-left-color: $warning-orange;
+
+    .notification-icon {
+      color: $warning-orange;
+    }
+  }
+
+  .notification-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+
+  .notification-content {
+    flex: 1;
+    min-width: 0;
+
+    .notification-message {
+      margin: 0;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: $black;
+      line-height: 1.5;
+    }
+  }
+
+  .notification-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: #6B7280;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $black;
+    }
+
+    svg {
+      display: block;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

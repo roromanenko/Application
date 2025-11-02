@@ -1,1 +1,4 @@
-console.log("Hello World!")
+export const environment = {
+  production: true,
+  apiBaseUrl: 'https://my-production-api.com/api'
+};

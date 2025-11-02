@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/api/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -18,21 +20,36 @@ export class RegisterComponent {
   password = '';
   confirmPassword = '';
 
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private notification: NotificationService
+  ) { }
+
   onSubmit() {
     if (this.password !== this.confirmPassword) {
-      alert('Passwords do not match!');
+      this.notification.error('Passwords do not match!');
       return;
     }
 
-    console.log('Register attempt:', {
-      firstName: this.firstName,
-      lastName: this.lastName,
-      username: this.username,
-      email: this.email,
-      password: this.password
+    this.auth.register(
+      this.username,
+      this.email,
+      this.firstName,
+      this.lastName,
+      this.password,
+      this.confirmPassword
+    ).subscribe({
+      next: () => {
+        this.notification.success('Registration successful! Redirecting to home...');
+        setTimeout(() => {
+          this.router.navigate(['/']);
+        }, 1500);
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.notification.error('Registration failed. Please try again.');
+      }
     });
-
-    // Позже добавим AuthService.register(...)
-    alert('Registration successful! (demo)');
   }
 }
