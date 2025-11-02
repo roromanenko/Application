@@ -2,6 +2,7 @@
 using Core.Options;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;

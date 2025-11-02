@@ -40,12 +40,15 @@ namespace Api.Extensions
 			services.AddScoped<ISubscriptionService, SubscriptionService>();
 			services.AddScoped<IJwtService, JwtService>();
 			services.AddScoped<PasswordHasher<UserEntity>>();
+			services.AddScoped<IEventService, EventService>();
 			services.AddAutoMapper(cfg =>
 			{
 				cfg.AddProfile<UserProfile>();
 				cfg.AddProfile<UserDtoProfile>();
 				cfg.AddProfile<SubscriptionProfile>();
 				cfg.AddProfile<SubscriptionDtoProfile>();
+				cfg.AddProfile<EventProfile>();
+				cfg.AddProfile<EventDtoProfile>();
 			});
 
 			return services;
@@ -68,6 +71,7 @@ namespace Api.Extensions
 			services.AddScoped<IMongoDbContext, MongoDbContext>();
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+			services.AddScoped<IEventRepository, EventRepository>();
 
 			return services;
 		}
