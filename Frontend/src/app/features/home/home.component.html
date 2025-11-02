@@ -1,11 +1,177 @@
-<section class="home">
-  <h1>Welcome to Event Management System</h1>
-  <p>
-    This is a demo version of the project built with <strong>Angular</strong> and <strong>ASP.NET Core</strong>.
-  </p>
+<section class="hero">
+  <div class="hero-content">
+    <h1>Organize Events <span class="highlight">Effortlessly</span></h1>
+    <p class="hero-subtitle">
+      Discover, plan, and manage events with ease. Subscribe to people, organizations,
+      and events you care about — all in one intuitive calendar.
+    </p>
+    <div class="hero-buttons">
+      <a routerLink="/register" class="btn btn-primary">Get Started Free</a>
+      <a routerLink="/login" class="btn btn-outline">Sign In</a>
+    </div>
+  </div>
+  <div class="hero-image">
+    <img src="assets/homeAssets/Event.jpg" alt="Event Management" class="hero-img">
+  </div>
+</section>
 
-  <div class="buttons">
-    <button>Explore Events</button>
-    <button>Login</button>
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Everything You Need to Manage Events</h2>
+    <p class="section-subtitle">Powerful features designed for organizers and attendees alike</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Smart Calendar</h3>
+        <p>View all your subscribed events in one unified calendar. Never miss an important date.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7Z" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Follow & Subscribe</h3>
+        <p>Subscribe to people, organizations, and specific events. Stay updated automatically.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V20M12 4L8 8M12 4L16 8M6 20H18" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Create Events</h3>
+        <p>Launch your own events in minutes. Manage attendees, schedules, and updates effortlessly.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 17H20L18.5951 15.5951C18.2141 15.2141 18 14.6973 18 14.1585V11C18 8.38757 16.3304 6.16509 14 5.34142V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V5.34142C7.66962 6.16509 6 8.38757 6 11V14.1585C6 14.6973 5.78595 15.2141 5.40493 15.5951L4 17H9M15 17V18C15 19.6569 13.6569 21 12 21C10.3431 21 9 19.6569 9 18V17M15 17H9" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Real-time Notifications</h3>
+        <p>Get instant updates about changes, new events, and reminders for upcoming activities.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Discover Events</h3>
+        <p>Explore public events tailored to your interests. Find what matters to you.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#6F8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3>Easy Management</h3>
+        <p>Intuitive dashboard to manage all your events, subscriptions, and followers in one place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Get started in three simple steps</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Create Your Account</h3>
+          <p>Sign up for free in seconds. No credit card required.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Subscribe & Discover</h3>
+          <p>Follow people, organizations, and events that interest you.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Organize & Attend</h3>
+          <p>Create your own events or join others. Everything syncs to your calendar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="benefits">
+  <div class="container">
+    <div class="benefits-content">
+      <div class="benefits-text">
+        <h2>Why Choose Our Platform?</h2>
+        <ul class="benefits-list">
+          <li>
+            <span class="check-icon">✓</span>
+            <div>
+              <strong>All-in-One Solution</strong>
+              <p>No more juggling multiple apps. Everything you need is here.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div>
+              <strong>Stay Connected</strong>
+              <p>Never lose track of events from your favorite organizers.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div>
+              <strong>Grow Your Audience</strong>
+              <p>Build a following and keep your community engaged.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <div>
+              <strong>Free to Start</strong>
+              <p>Get access to all core features without any upfront cost.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="benefits-visual">
+        <div class="visual-placeholder">
+          <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="150" r="120" fill="#D6F272" opacity="0.2" />
+            <circle cx="150" cy="150" r="80" fill="#BAF266" opacity="0.4" />
+            <circle cx="150" cy="150" r="40" fill="#6F8C42" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Ready to Get Started?</h2>
+      <p>Join thousands of users organizing and discovering amazing events</p>
+      <a routerLink="/register" class="btn btn-primary btn-large">Create Free Account</a>
+    </div>
   </div>
 </section>
