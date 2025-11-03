@@ -6,12 +6,12 @@
 		string Title,
 		string? Description,
 		string OrganizerId,
-		DateTime StartDate,
-		DateTime EndDate,
+		DateTimeOffset StartDate,
+		DateTimeOffset EndDate,
 		string? Location,
 		bool IsPublic,
 		IEnumerable<string> ParticipantIds,
-		DateTime CreatedAt,
-		DateTime UpdatedAt
+		DateTimeOffset CreatedAt,
+		DateTimeOffset UpdatedAt
 	);
 }

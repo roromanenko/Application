@@ -8,6 +8,8 @@ namespace Api.Mapping.Profiles
 	{
 		public EventDtoProfile()
 		{
+			CreateMap<CreateEventRequest, Event>();
+			CreateMap<UpdateEventRequest, Event>();
 			CreateMap<Event, EventDto>().ReverseMap();
 		}
 	}

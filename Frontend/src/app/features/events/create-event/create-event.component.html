@@ -1,0 +1,150 @@
+<section class="create-event-page">
+  <div class="create-event-container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Create New Event</h1>
+        <p>Fill in the details below to create your event</p>
+      </div>
+      <button type="button" class="btn-close" routerLink="/events" title="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" #eventForm="ngForm" class="event-form">
+
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title" class="required">Event Title</label>
+        <input type="text"
+               id="title"
+               name="title"
+               [(ngModel)]="title"
+               class="form-input"
+               placeholder="e.g., Summer Tech Conference 2025"
+               required
+               minlength="3"
+               maxlength="200"
+               #titleField="ngModel" />
+        <span class="error-message" *ngIf="titleField.invalid && titleField.touched">
+          <span *ngIf="titleField.errors?.['required']">Title is required</span>
+          <span *ngIf="titleField.errors?.['minlength']">Title must be at least 3 characters</span>
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description"
+                  name="description"
+                  [(ngModel)]="description"
+                  class="form-textarea"
+                  placeholder="Tell people what your event is about..."
+                  rows="6"
+                  maxlength="2000"></textarea>
+        <div class="char-count">
+          {{ description.length }} / 2000
+        </div>
+      </div>
+
+      <!-- Date & Time Row -->
+      <div class="form-row">
+        <!-- Start Date & Time -->
+        <div class="form-group">
+          <label for="startDate" class="required">Start Date & Time</label>
+          <input type="datetime-local"
+                 id="startDate"
+                 name="startDate"
+                 [(ngModel)]="startDate"
+                 [min]="minDate"
+                 (change)="onStartDateChange()"
+                 class="form-input"
+                 required
+                 #startDateField="ngModel" />
+          <span class="error-message" *ngIf="startDateField.invalid && startDateField.touched">
+            Start date and time are required
+          </span>
+        </div>
+
+        <!-- End Date & Time -->
+        <div class="form-group">
+          <label for="endDate" class="required">End Date & Time</label>
+          <input type="datetime-local"
+                 id="endDate"
+                 name="endDate"
+                 [(ngModel)]="endDate"
+                 [min]="minEndDate"
+                 (change)="onEndDateChange()"
+                 class="form-input"
+                 required
+                 #endDateField="ngModel" />
+          <span class="error-message" *ngIf="endDateField.invalid && endDateField.touched">
+            End date and time are required
+          </span>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input type="text"
+               id="location"
+               name="location"
+               [(ngModel)]="location"
+               class="form-input"
+               placeholder="e.g., Conference Center, Main Street 123 or Online"
+               maxlength="200" />
+        <div class="input-hint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Physical location or specify "Online" for virtual events
+        </div>
+      </div>
+
+      <!-- Visibility Toggle -->
+      <div class="form-group">
+        <label class="toggle-label">
+          <span class="toggle-text">
+            <strong>Event Visibility</strong>
+            <span class="toggle-description">
+              {{ isPublic ? 'Public - Anyone can view and join this event' : 'Private - Only invited people can view this event' }}
+            </span>
+          </span>
+          <label class="toggle-switch">
+            <input type="checkbox"
+                   name="isPublic"
+                   [(ngModel)]="isPublic" />
+            <span class="toggle-slider"></span>
+          </label>
+        </label>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button"
+                class="btn btn-cancel"
+                (click)="cancel()"
+                [disabled]="isSubmitting">
+          Cancel
+        </button>
+        <button type="submit"
+                class="btn btn-primary"
+                [disabled]="eventForm.invalid || isSubmitting">
+          <span *ngIf="!isSubmitting">Create Event</span>
+          <span *ngIf="isSubmitting" class="loading">
+            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.25" />
+              <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            </svg>
+            Creating...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

@@ -3,32 +3,33 @@
     <a routerLink="/" class="logo">
       <span class="logo-text">Event<span class="logo-accent">Manager</span></span>
     </a>
-
     <div class="nav-links">
       <a *ngIf="!(isLoggedIn$ | async)"
          routerLink="/"
          class="nav-link"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">Home</a>
-
       <a routerLink="/events" class="nav-link" routerLinkActive="active">Events</a>
-
       <a *ngIf="isLoggedIn$ | async"
          routerLink="/calendar"
          class="nav-link"
          routerLinkActive="active">Calendar</a>
     </div>
   </div>
-
   <div class="nav-right">
     <!-- Non-authenticated -->
     <ng-container *ngIf="!(isLoggedIn$ | async); else loggedInMenu">
       <a routerLink="/login" class="btn btn-login">Login</a>
       <a routerLink="/register" class="btn btn-register">Get Started</a>
     </ng-container>
-
     <!-- Authenticated -->
     <ng-template #loggedInMenu>
+      <a routerLink="/events/create" class="btn btn-create">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>Create Event</span>
+      </a>
       <div class="profile-menu">
         <button class="profile-button" (click)="logout()">
           <img src="assets/profile-icon.svg" alt="Profile" class="profile-icon" />
