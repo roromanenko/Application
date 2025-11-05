@@ -27,9 +27,8 @@ namespace Infrastructure.Persistence.Entity
 
 		[BsonDefaultValue(true)]
 		public bool IsPublic { get; set; }
+		public int Capacity { get; set; }
 
-		public List<string> ParticipantIds { get; set; } = [];
-		
 		[BsonRequired] 
 		public DateTimeOffset CreatedAt { get; set; } = DateTime.UtcNow;
 

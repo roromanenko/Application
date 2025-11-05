@@ -16,11 +16,13 @@ namespace Infrastructure.Services
 	public class EventService : IEventService
 	{
 		private readonly IEventRepository _eventRepository;
+		private readonly IParticipantService _participantService;
 		private readonly IMapper _mapper;
 
-		public EventService(IEventRepository eventRepository, IMapper mapper)
+		public EventService(IEventRepository eventRepository, IParticipantService participantService, IMapper mapper)
 		{
 			_eventRepository = eventRepository;
+			_participantService = participantService;
 			_mapper = mapper;
 		}
 
@@ -29,6 +31,33 @@ namespace Infrastructure.Services
 			var entity = _mapper.Map<EventEntity>(newEvent);
 			var created = await _eventRepository.CreateEvent(entity);
 			return _mapper.Map<Event>(created);
+		}
+
+		public async Task<bool> JoinEventAsync(string eventId, string userId)
+		{
+			var ev = await _eventRepository.GetEventById(new ObjectId(eventId));
+			if (ev == null)
+				throw new ArgumentException("Event not found");
+
+			var participants = await _participantService.GetFollowersAsync(eventId);
+			if (ev.Capacity > 0 && participants.Count() >= ev.Capacity)
+				throw new InvalidOperationException("Event is already full");
+
+			if (participants.Any(p => p.FollowerId == userId))
+				throw new InvalidOperationException("Already joined this event");
+
+			await _participantService.SubscribeAsync(userId, eventId);
+			return true;
+		}
+
+		public async Task<bool> LeaveEventAsync(string eventId, string userId)
+		{
+			var existing = await _participantService.IsFollowingAsync(userId, eventId);
+			if (!existing)
+				return false;
+
+			await _participantService.UnsubscribeAsync(userId, eventId);
+			return true;
 		}
 
 		public async Task<Event?> GetEventByIdAsync(string eventId)
@@ -60,6 +89,12 @@ namespace Infrastructure.Services
 				entities = entities.Where(e => e.IsPublic);
 
 			return _mapper.Map<IEnumerable<Event>>(entities);
+		}
+
+		public async Task<int> GetParticipantCountAsync(string eventId)
+		{
+			var followers = await _participantService.GetFollowersAsync(eventId);
+			return followers.Count();
 		}
 
 		public async Task<bool> UpdateEventAsync(Event updatedEvent)

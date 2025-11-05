@@ -35,8 +35,15 @@ namespace Infrastructure.Persistence.Repositories
 
 		public async Task<IEnumerable<EventEntity>> GetEventsByTitle(string title)
 		{
-			var filter = Builders<EventEntity>.Filter.Regex(e => e.Title, new BsonRegularExpression($"^{Regex.Escape(title)}$", "i"));
-			return await _dbContext.GetCollection<EventEntity>().Find(filter).ToListAsync();
+			var filter = Builders<EventEntity>.Filter.Regex(
+				e => e.Title,
+				new BsonRegularExpression(title, "i")
+			);
+
+			return await _dbContext
+				.GetCollection<EventEntity>()
+				.Find(filter)
+				.ToListAsync();
 		}
 
 		public async Task<IEnumerable<EventEntity>> GetEventsByOrganizer(string organizerId)
@@ -64,11 +71,11 @@ namespace Infrastructure.Persistence.Repositories
 				"startdate" => options.SortDescending
 					? Builders<EventEntity>.Sort.Descending(e => e.StartDate)
 					: Builders<EventEntity>.Sort.Ascending(e => e.StartDate),
-
+					/*
 				"participants" => options.SortDescending
 					? Builders<EventEntity>.Sort.Descending(e => e.ParticipantIds.Count)
 					: Builders<EventEntity>.Sort.Ascending(e => e.ParticipantIds.Count),
-
+					*/
 				_ => options.SortDescending
 					? Builders<EventEntity>.Sort.Descending(e => e.CreatedAt)
 					: Builders<EventEntity>.Sort.Ascending(e => e.CreatedAt)

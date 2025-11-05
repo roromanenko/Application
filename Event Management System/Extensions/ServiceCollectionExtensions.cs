@@ -37,7 +37,7 @@ namespace Api.Extensions
 		private static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.AddScoped<IUserService, UserService>();
-			services.AddScoped<ISubscriptionService, SubscriptionService>();
+			services.AddScoped<IParticipantService, ParticipantService>();
 			services.AddScoped<IJwtService, JwtService>();
 			services.AddScoped<PasswordHasher<UserEntity>>();
 			services.AddScoped<IEventService, EventService>();
@@ -45,7 +45,7 @@ namespace Api.Extensions
 			{
 				cfg.AddProfile<UserProfile>();
 				cfg.AddProfile<UserDtoProfile>();
-				cfg.AddProfile<SubscriptionProfile>();
+				cfg.AddProfile<ParticipantProfile>();
 				cfg.AddProfile<SubscriptionDtoProfile>();
 				cfg.AddProfile<EventProfile>();
 				cfg.AddProfile<EventDtoProfile>();
@@ -70,7 +70,7 @@ namespace Api.Extensions
 
 			services.AddScoped<IMongoDbContext, MongoDbContext>();
 			services.AddScoped<IUserRepository, UserRepository>();
-			services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+			services.AddScoped<IParticipantRepository, ParticipantRepository>();
 			services.AddScoped<IEventRepository, EventRepository>();
 
 			return services;

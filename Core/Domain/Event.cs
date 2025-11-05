@@ -17,7 +17,7 @@ namespace Core.Domain
 		public DateTimeOffset EndDate { get; set; }
 		public string? Location { get; set; }
 		public bool IsPublic { get; set; } = true;
-		public List<string> ParticipantIds { get; set; } = [];
+		public int Capacity { get; set; }
 
 		public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.Now;
 		public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.Now;

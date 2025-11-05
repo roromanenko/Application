@@ -3,10 +3,14 @@ import { HomeComponent } from './features/home/home.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { CreateEventComponent } from './features/events/create-event/create-event.component'
+import { EventsListComponent } from './features/events/event-list/event-list.component'
+import { ProfileComponent } from './features/profile/profile.component'
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'events/create', component: CreateEventComponent }
+  { path: 'events/create', component: CreateEventComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'events', component: EventsListComponent }
 ];

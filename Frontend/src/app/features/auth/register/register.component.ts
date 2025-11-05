@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/api/auth.service';
+import { Client, RegisterRequest } from '../../../core/api/generated-api';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class RegisterComponent {
   confirmPassword = '';
 
   constructor(
-    private auth: AuthService,
+    private client: Client,
     private router: Router,
     private notification: NotificationService
   ) { }
@@ -32,23 +32,32 @@ export class RegisterComponent {
       return;
     }
 
-    this.auth.register(
-      this.username,
-      this.email,
-      this.firstName,
-      this.lastName,
-      this.password,
-      this.confirmPassword
-    ).subscribe({
-      next: () => {
-        this.notification.success('Registration successful! Redirecting to home...');
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 1500);
+    const request = new RegisterRequest({
+      username: this.username,
+      email: this.email,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      password: this.password,
+      confirmPassword: this.confirmPassword
+    });
+
+    this.client.register(request).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.notification.success('Registration successful! Please log in.');
+          this.router.navigate(['/login']);
+        } else {
+          this.notification.error(res.message ?? 'Registration failed. Please try again.');
+        }
       },
-      error: (err: any) => {
-        console.error(err);
-        this.notification.error('Registration failed. Please try again.');
+      error: (err) => {
+        console.error('Registration error:', err);
+
+        const msg =
+          (err.error?.message ?? err.response?.message) ??
+          'Registration failed. Please try again.';
+
+        this.notification.error(msg);
       }
     });
   }

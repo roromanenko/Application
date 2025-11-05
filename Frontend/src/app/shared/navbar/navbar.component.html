@@ -31,10 +31,12 @@
         <span>Create Event</span>
       </a>
       <div class="profile-menu">
-        <button class="profile-button" (click)="logout()">
-          <img src="assets/profile-icon.svg" alt="Profile" class="profile-icon" />
-          <span class="profile-name">John Doe</span>
-        </button>
+        <a routerLink="/profile" class="profile-button">
+          <div class="profile-avatar">
+            {{ getInitials() }}
+          </div>
+          <span class="profile-name">Profile</span>
+        </a>
       </div>
     </ng-template>
   </div>

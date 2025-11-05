@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { EventService, CreateEventRequest } from '../../../core/services/event.service';
+import { Client, CreateEventRequest } from '../../../core/api/generated-api';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -18,21 +18,22 @@ export class CreateEventComponent {
   startDate = '';
   endDate = '';
   location = '';
+  capacity: number | null = null;
   isPublic = true;
   isSubmitting = false;
   minDate: string;
   minEndDate: string;
 
   constructor(
-    private eventService: EventService,
+    private client: Client,
     private notification: NotificationService,
     private router: Router
   ) {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     this.minDate = now.toISOString().slice(0, 16);
-
     this.startDate = this.minDate;
+
     const endDateTime = new Date(now.getTime() + 60 * 60 * 1000);
     this.endDate = endDateTime.toISOString().slice(0, 16);
     this.minEndDate = this.startDate;
@@ -58,47 +59,45 @@ export class CreateEventComponent {
   }
 
   onSubmit() {
-    if (!this.validateForm()) {
-      return;
-    }
+    if (!this.validateForm()) return;
 
     this.isSubmitting = true;
 
-    if (new Date(this.endDate) <= new Date(this.startDate)) {
-      this.notification.error('End date/time must be after start date/time');
-      this.isSubmitting = false;
-      return;
-    }
-
-    const event: CreateEventRequest = {
+    const request = new CreateEventRequest({
       title: this.title.trim(),
-      description: this.description.trim() || null,
-      startDate: new Date(this.startDate).toISOString(),
-      endDate: new Date(this.endDate).toISOString(),
-      location: this.location.trim() || null,
+      description: this.description.trim() || undefined,
+      startDate: new Date(this.startDate),
+      endDate: new Date(this.endDate),
+      location: this.location.trim() || undefined,
+      capacity: this.capacity ?? 0,
       isPublic: this.isPublic
-    };
+    });
 
-    this.eventService.create(event).subscribe({
+    this.client.eventPOST(request).subscribe({
       next: (res) => {
-        this.notification.success(res.message || 'Event created successfully!');
-        console.log('Created event:', res.data);
-        setTimeout(() => {
+        if (res.success) {
+          this.notification.success(res.message ?? 'Event created successfully!');
           this.router.navigate(['/events']);
-        }, 1000);
+        } else {
+          this.notification.error(res.message ?? 'Failed to create event');
+        }
       },
       error: (err) => {
         console.error('Error creating event:', err);
-        this.isSubmitting = false;
 
         if (err.status === 401) {
           this.notification.error('You must be logged in to create events');
           this.router.navigate(['/login']);
-        } else if (err.error?.message) {
-          this.notification.error(err.error.message);
         } else {
-          this.notification.error('Failed to create event. Please try again.');
+          const msg =
+            err.error?.message ??
+            err.response?.message ??
+            'Failed to create event. Please try again.';
+          this.notification.error(msg);
         }
+      },
+      complete: () => {
+        this.isSubmitting = false;
       }
     });
   }
@@ -108,22 +107,22 @@ export class CreateEventComponent {
       this.notification.error('Title is required');
       return false;
     }
-
     if (this.title.trim().length < 3) {
       this.notification.error('Title must be at least 3 characters');
       return false;
     }
-
     if (!this.startDate) {
       this.notification.error('Start date is required');
       return false;
     }
-
     if (!this.endDate) {
       this.notification.error('End date is required');
       return false;
     }
-
+    if (this.capacity !== null && this.capacity < 0) {
+      this.notification.error('Capacity cannot be negative');
+      return false;
+    }
     return true;
   }
 

@@ -6,6 +6,7 @@
 		DateTime StartDate,
 		DateTime EndDate,
 		string? Location,
+		int? Capacity,
 		bool IsPublic
 	);
 
@@ -15,6 +16,7 @@
 		DateTime StartDate,
 		DateTime EndDate,
 		string? Location,
+		int? Capacity,
 		bool IsPublic
 	);
 }

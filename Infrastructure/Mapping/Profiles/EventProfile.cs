@@ -27,7 +27,7 @@ namespace Infrastructure.Mapping.Profiles
 				EndDate = e.EndDate,
 				Location = e.Location,
 				IsPublic = e.IsPublic,
-				ParticipantIds = e.ParticipantIds.ToList(),
+				Capacity = e.Capacity,
 				CreatedAt = e.CreatedAt,
 				UpdatedAt = e.UpdatedAt
 			});
@@ -43,7 +43,7 @@ namespace Infrastructure.Mapping.Profiles
 				EndDate = e.EndDate,
 				Location = e.Location,
 				IsPublic = e.IsPublic,
-				ParticipantIds = e.ParticipantIds.ToList(),
+				Capacity = e.Capacity,
 				CreatedAt = e.CreatedAt,
 				UpdatedAt = e.UpdatedAt
 			});

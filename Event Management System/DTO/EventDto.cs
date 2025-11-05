@@ -10,7 +10,7 @@
 		DateTimeOffset EndDate,
 		string? Location,
 		bool IsPublic,
-		IEnumerable<string> ParticipantIds,
+		int Capacity,
 		DateTimeOffset CreatedAt,
 		DateTimeOffset UpdatedAt
 	);

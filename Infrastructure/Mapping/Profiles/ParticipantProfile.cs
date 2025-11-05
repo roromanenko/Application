@@ -10,29 +10,25 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Mapping.Profiles
 {
-	public class SubscriptionProfile : Profile
+	public class ParticipantProfile : Profile
 	{
-		public SubscriptionProfile()
+		public ParticipantProfile()
 		{
-			CreateMap<Subscription, SubscriptionEntity>()
-				.ConstructUsing(s => new SubscriptionEntity
+			CreateMap<Participant, ParticipantEntity>()
+				.ConstructUsing(s => new ParticipantEntity
 				{
 					Id = string.IsNullOrEmpty(s.Id) ? ObjectId.GenerateNewId() : ObjectId.Parse(s.Id),
 					FollowerId = s.FollowerId,
 					TargetId = s.TargetId,
-					TargetType = s.TargetType.ToString(),
-					IsBlocked = s.IsBlocked,
 					CreatedAt = s.CreatedAt
 				});
 
-			CreateMap<SubscriptionEntity, Subscription>()
-				.ConstructUsing(e => new Subscription
+			CreateMap<ParticipantEntity, Participant>()
+				.ConstructUsing(e => new Participant
 				{
 					Id = e.Id.ToString(),
 					FollowerId = e.FollowerId,
 					TargetId = e.TargetId,
-					TargetType = Enum.Parse<SubscriptionTargetType>(e.TargetType, true),
-					IsBlocked = e.IsBlocked,
 					CreatedAt = e.CreatedAt
 				});
 		}

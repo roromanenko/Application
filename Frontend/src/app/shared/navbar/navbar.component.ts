@@ -1,23 +1,73 @@
-import { Component } from '@angular/core';
-import { CommonModule, AsyncPipe } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/api/auth.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Client, UserDto } from '../../core/api/generated-api';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { constants } from '../constants';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, AsyncPipe],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
-  isLoggedIn$;
+export class NavbarComponent implements OnInit {
+  user: UserDto | null = null;
 
-  constructor(private auth: AuthService) {
-    this.isLoggedIn$ = this.auth.isLoggedIn$;
+  constructor(
+    private client: Client,
+    private router: Router,
+    private authService: AuthService,
+  )
+  {
+
   }
 
-  logout() {
-    this.auth.logout();
+  ngOnInit()
+  {
+    this.authService.isLoggedIn$.subscribe(isLoggedIn =>
+    {
+      if (isLoggedIn)
+      {
+        this.loadUserProfile();
+      }
+      else
+      {
+        this.user = null;
+      }
+    });
+  }
+
+  loadUserProfile()
+  {
+    const userString = (localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY))
+    if (userString)
+    {
+      this.user = JSON.parse(userString);
+    }
+  }
+
+  getInitials(): string
+  {
+    if (!this.user) {
+      const userInfoStr = localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY);
+      if (userInfoStr) {
+        try {
+          const userInfo = JSON.parse(userInfoStr);
+          const firstInitial = userInfo.firstName?.charAt(0)?.toUpperCase() || '';
+          const lastInitial = userInfo.lastName?.charAt(0)?.toUpperCase() || '';
+          return firstInitial + lastInitial || 'U';
+        } catch {
+          return 'U';
+        }
+      }
+      return 'U';
+    }
+
+    const firstInitial = this.user.firstName?.charAt(0)?.toUpperCase() || '';
+    const lastInitial = this.user.lastName?.charAt(0)?.toUpperCase() || '';
+    return firstInitial + lastInitial || 'U';
   }
 }

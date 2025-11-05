@@ -2,8 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/api/auth.service';
+import { Client, LoginRequest } from '../../../core/api/generated-api';
 import { NotificationService } from '../../../core/services/notification.service';
+import { constants } from '../../../shared/constants';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -18,9 +20,10 @@ export class LoginComponent {
   rememberMe = false;
 
   constructor(
-    private auth: AuthService,
+    private client: Client,
     private router: Router,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) { }
 
   onSubmit() {
@@ -30,20 +33,35 @@ export class LoginComponent {
       rememberMe: this.rememberMe
     });
 
-    this.auth.login(this.usernameOrEmail, this.password, this.rememberMe).subscribe({
-      next: () => {
-        this.notification.success('Welcome back! Login successful.');
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 1000);
+    const request = new LoginRequest({
+      usernameOrEmail: this.usernameOrEmail,
+      password: this.password
+    });
+
+    this.client.login(request).subscribe({
+      next: (response) => {
+        const token = response.data?.accessToken;
+
+        if (response.success && token) {
+          const storage = this.rememberMe ? localStorage : sessionStorage;
+          storage.setItem(constants.TOKEN_KEY, token);
+          this.authService.login(token, storage, response.data?.user);
+
+          this.notification.success('Welcome back! Login successful.');
+          setTimeout(() => this.router.navigate(['/']), 1000);
+        }
+        else
+        {
+          this.notification.error(response.message || 'Login failed.');
+        }
       },
       error: (err) => {
-        console.error(err);
+        console.error('Login error:', err);
 
         if (err.status === 401) {
-          this.notification.error('Invalid username or password. Please try again.');
+          this.notification.error('Invalid username or password.');
         } else if (err.status === 0) {
-          this.notification.error('Unable to connect to server. Please check your connection.');
+          this.notification.error('Cannot connect to server.');
         } else {
           this.notification.error('Login failed. Please try again later.');
         }

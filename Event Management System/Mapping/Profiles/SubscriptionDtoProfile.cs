@@ -8,7 +8,7 @@ namespace Api.Mapping.Profiles
 	{
 		public SubscriptionDtoProfile()
 		{
-			CreateMap<Subscription, SubscriptionDto>().ReverseMap();
+			CreateMap<Participant, ParticipantDto>().ReverseMap();
 		}
 	}
 }
