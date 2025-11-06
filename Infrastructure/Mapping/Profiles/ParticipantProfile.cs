@@ -1,12 +1,6 @@
 ﻿using AutoMapper;
 using Core.Domain;
 using Infrastructure.Persistence.Entity;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Mapping.Profiles
 {
@@ -15,22 +9,15 @@ namespace Infrastructure.Mapping.Profiles
 		public ParticipantProfile()
 		{
 			CreateMap<Participant, ParticipantEntity>()
-				.ConstructUsing(s => new ParticipantEntity
-				{
-					Id = string.IsNullOrEmpty(s.Id) ? ObjectId.GenerateNewId() : ObjectId.Parse(s.Id),
-					FollowerId = s.FollowerId,
-					TargetId = s.TargetId,
-					CreatedAt = s.CreatedAt
-				});
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src =>
+					string.IsNullOrEmpty(src.Id) ? Guid.NewGuid() : Guid.Parse(src.Id)))
+				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => Guid.Parse(src.UserId)))
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => Guid.Parse(src.EventId)));
 
 			CreateMap<ParticipantEntity, Participant>()
-				.ConstructUsing(e => new Participant
-				{
-					Id = e.Id.ToString(),
-					FollowerId = e.FollowerId,
-					TargetId = e.TargetId,
-					CreatedAt = e.CreatedAt
-				});
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
+				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId.ToString()))
+				.ForMember(dest => dest.EventId, opt => opt.MapFrom(src => src.EventId.ToString()));
 		}
 	}
 }

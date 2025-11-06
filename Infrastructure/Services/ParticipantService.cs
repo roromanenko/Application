@@ -3,7 +3,6 @@ using Core.Domain;
 using Core.Interfaces;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
-using MongoDB.Bson;
 
 namespace Infrastructure.Services
 {
@@ -12,15 +11,21 @@ namespace Infrastructure.Services
 		private readonly IParticipantRepository _participantRepository;
 		private readonly IMapper _mapper;
 
-		public ParticipantService(IParticipantRepository subscriptionRepository, IMapper mapper)
+		public ParticipantService(IParticipantRepository participantRepository, IMapper mapper)
 		{
-			_participantRepository = subscriptionRepository;
+			_participantRepository = participantRepository;
 			_mapper = mapper;
 		}
 
-		public async Task<Participant> SubscribeAsync(string followerId, string targetId)
+		public async Task<Participant> SubscribeAsync(string userId, string eventId)
 		{
-			var existingEntity = await _participantRepository.GetSubscription(followerId, targetId);
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
+
+			if (!Guid.TryParse(eventId, out var eventGuid))
+				throw new ArgumentException("Invalid event ID format");
+
+			var existingEntity = await _participantRepository.GetSubscription(userGuid, eventGuid);
 			if (existingEntity is not null)
 			{
 				return _mapper.Map<Participant>(existingEntity);
@@ -28,18 +33,24 @@ namespace Infrastructure.Services
 
 			var newEntity = new ParticipantEntity
 			{
-				FollowerId = followerId,
-				TargetId = targetId,
-				CreatedAt = DateTime.UtcNow
+				UserId = userGuid,
+				EventId = eventGuid,
+				CreatedAt = DateTimeOffset.UtcNow
 			};
 
 			var createdEntity = await _participantRepository.CreateSubscription(newEntity);
 			return _mapper.Map<Participant>(createdEntity);
 		}
 
-		public async Task<bool> UnsubscribeAsync(string followerId, string targetId)
+		public async Task<bool> UnsubscribeAsync(string userId, string eventId)
 		{
-			var entity = await _participantRepository.GetSubscription(followerId, targetId);
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
+
+			if (!Guid.TryParse(eventId, out var eventGuid))
+				throw new ArgumentException("Invalid event ID format");
+
+			var entity = await _participantRepository.GetSubscription(userGuid, eventGuid);
 			if (entity is null)
 				return false;
 
@@ -47,23 +58,33 @@ namespace Infrastructure.Services
 			return true;
 		}
 
-		public async Task<IEnumerable<Participant>> GetFollowingAsync(string followerId)
+		public async Task<IEnumerable<Participant>> GetFollowingAsync(string userId)
 		{
-			var entities = await _participantRepository.GetByFollower(followerId);
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
 
+			var entities = await _participantRepository.GetByFollower(userGuid);
 			return _mapper.Map<IEnumerable<Participant>>(entities);
 		}
 
-		public async Task<IEnumerable<Participant>> GetFollowersAsync(string targetId)
+		public async Task<IEnumerable<Participant>> GetFollowersAsync(string eventId)
 		{
-			var entities = await _participantRepository.GetByTarget(targetId);
+			if (!Guid.TryParse(eventId, out var eventGuid))
+				throw new ArgumentException("Invalid event ID format");
 
+			var entities = await _participantRepository.GetByTarget(eventGuid);
 			return _mapper.Map<IEnumerable<Participant>>(entities);
 		}
 
-		public async Task<bool> IsFollowingAsync(string followerId, string targetId)
+		public async Task<bool> IsFollowingAsync(string userId, string eventId)
 		{
-			var entity = await _participantRepository.GetSubscription(followerId, targetId);
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
+
+			if (!Guid.TryParse(eventId, out var eventGuid))
+				throw new ArgumentException("Invalid event ID format");
+
+			var entity = await _participantRepository.GetSubscription(userGuid, eventGuid);
 			return entity is not null;
 		}
 	}

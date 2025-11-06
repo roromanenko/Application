@@ -1,66 +1,53 @@
-﻿using Core.Domain;
-using Core.Interfaces;
-using Core.Options;
-using Infrastructure.Interfaces;
+﻿using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
 	public class ParticipantRepository : IParticipantRepository
 	{
-		private readonly MongoDbOptions _mongoDbOptions;
-		private readonly IMongoDbContext _dbContext;
+		private readonly ApplicationDbContext _dbContext;
 
-		public ParticipantRepository(IOptions<MongoDbOptions> mongoDbOptions, IMongoDbContext dbContext)
+		public ParticipantRepository(ApplicationDbContext dbContext)
 		{
-			_mongoDbOptions = mongoDbOptions.Value;
 			_dbContext = dbContext;
 		}
 
 		public async Task<ParticipantEntity> CreateSubscription(ParticipantEntity entity)
 		{
-			await _dbContext.GetCollection<ParticipantEntity>().InsertOneAsync(entity);
+			await _dbContext.Participants.AddAsync(entity);
+			await _dbContext.SaveChangesAsync();
 			return entity;
 		}
 
-		public async Task<ParticipantEntity?> GetSubscription(string followerId, string targetId)
+		public async Task<ParticipantEntity?> GetSubscription(Guid userId, Guid eventId)
 		{
-			var filter = Builders<ParticipantEntity>.Filter.Eq(s => s.FollowerId, followerId) &
-						 Builders<ParticipantEntity>.Filter.Eq(s => s.TargetId, targetId);
-
-			return await _dbContext.GetCollection<ParticipantEntity>()
-				.Find(filter)
-				.FirstOrDefaultAsync();
+			return await _dbContext.Participants
+				.FirstOrDefaultAsync(p => p.UserId == userId && p.EventId == eventId);
 		}
 
-		public async Task<IEnumerable<ParticipantEntity>> GetByFollower(string followerId)
+		public async Task<IEnumerable<ParticipantEntity>> GetByFollower(Guid userId)
 		{
-			var filter = Builders<ParticipantEntity>.Filter.Eq(s => s.FollowerId, followerId);
-			return await _dbContext.GetCollection<ParticipantEntity>()
-				.Find(filter)
+			return await _dbContext.Participants
+				.Where(p => p.UserId == userId)
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<ParticipantEntity>> GetByTarget(string targetId)
+		public async Task<IEnumerable<ParticipantEntity>> GetByTarget(Guid eventId)
 		{
-			var filter = Builders<ParticipantEntity>.Filter.Eq(s => s.TargetId, targetId);
-			return await _dbContext.GetCollection<ParticipantEntity>()
-				.Find(filter)
+			return await _dbContext.Participants
+				.Where(p => p.EventId == eventId)
 				.ToListAsync();
 		}
 
-		public async Task DeleteSubscription(ObjectId id)
+		public async Task DeleteSubscription(Guid id)
 		{
-			var filter = Builders<ParticipantEntity>.Filter.Eq(s => s.Id, id);
-			await _dbContext.GetCollection<ParticipantEntity>().DeleteOneAsync(filter);
+			var participant = await _dbContext.Participants.FindAsync(id);
+			if (participant != null)
+			{
+				_dbContext.Participants.Remove(participant);
+				await _dbContext.SaveChangesAsync();
+			}
 		}
 	}
 }

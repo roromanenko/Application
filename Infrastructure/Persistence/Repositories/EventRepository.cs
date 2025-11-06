@@ -1,110 +1,98 @@
-﻿using Core.Interfaces;
-using Core.Options;
+﻿using Core.Options;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
 	public class EventRepository : IEventRepository
 	{
-		private readonly MongoDbOptions _mongoDbOptions;
-		private readonly IMongoDbContext _dbContext;
+		private readonly ApplicationDbContext _dbContext;
 
-		public EventRepository(IOptions<MongoDbOptions> mongoDbOptions, IMongoDbContext dbContext)
+		public EventRepository(ApplicationDbContext dbContext)
 		{
-			_mongoDbOptions = mongoDbOptions.Value;
 			_dbContext = dbContext;
 		}
 
 		public async Task<EventEntity> CreateEvent(EventEntity newEvent)
 		{
-			await _dbContext.GetCollection<EventEntity>().InsertOneAsync(newEvent);
+			await _dbContext.Events.AddAsync(newEvent);
+			await _dbContext.SaveChangesAsync();
 			return newEvent;
 		}
 
-		public async Task<EventEntity> GetEventById(ObjectId eventId)
+		public async Task<EventEntity?> GetEventById(Guid eventId)
 		{
-			var filter = Builders<EventEntity>.Filter.Eq(e => e.Id, eventId);
-			return await _dbContext.GetCollection<EventEntity>().Find(filter).FirstOrDefaultAsync(); 
+			return await _dbContext.Events
+				.FirstOrDefaultAsync(e => e.Id == eventId);
 		}
 
 		public async Task<IEnumerable<EventEntity>> GetEventsByTitle(string title)
 		{
-			var filter = Builders<EventEntity>.Filter.Regex(
-				e => e.Title,
-				new BsonRegularExpression(title, "i")
-			);
-
-			return await _dbContext
-				.GetCollection<EventEntity>()
-				.Find(filter)
+			return await _dbContext.Events
+				.Where(e => EF.Functions.ILike(e.Title, $"%{title}%"))
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<EventEntity>> GetEventsByOrganizer(string organizerId)
+		public async Task<IEnumerable<EventEntity>> GetEventsByOrganizer(Guid organizerId)
 		{
-			var filter = Builders<EventEntity>.Filter.Eq(e => e.OrganizerId, organizerId);
-			return await _dbContext.GetCollection<EventEntity>().Find(filter).ToListAsync();
+			return await _dbContext.Events
+				.Where(e => e.OrganizerId == organizerId)
+				.ToListAsync();
 		}
 
 		public async Task<IEnumerable<EventEntity>> GetEvents(EventQueryOptions options)
 		{
-			var collection = _dbContext.GetCollection<EventEntity>();
-			var filterBuilder = Builders<EventEntity>.Filter;
-			var filters = new List<FilterDefinition<EventEntity>>();
+			var query = _dbContext.Events.AsQueryable();
 
 			if (!string.IsNullOrEmpty(options.OrganizerId))
-				filters.Add(filterBuilder.Eq(e => e.OrganizerId, options.OrganizerId));
+			{
+				var organizerGuid = Guid.Parse(options.OrganizerId);
+				query = query.Where(e => e.OrganizerId == organizerGuid);
+			}
 
 			if (!string.IsNullOrEmpty(options.Title))
-				filters.Add(filterBuilder.Regex(e => e.Title, new BsonRegularExpression(options.Title, "i")));
+			{
+				query = query.Where(e => EF.Functions.ILike(e.Title, $"%{options.Title}%"));
+			}
 
-			var finalFilter = filters.Any() ? filterBuilder.And(filters) : filterBuilder.Empty;
-
-			SortDefinition<EventEntity> sort = options.SortBy?.ToLower() switch
+			query = options.SortBy?.ToLower() switch
 			{
 				"startdate" => options.SortDescending
-					? Builders<EventEntity>.Sort.Descending(e => e.StartDate)
-					: Builders<EventEntity>.Sort.Ascending(e => e.StartDate),
-					/*
+					? query.OrderByDescending(e => e.StartDate)
+					: query.OrderBy(e => e.StartDate),
 				"participants" => options.SortDescending
-					? Builders<EventEntity>.Sort.Descending(e => e.ParticipantIds.Count)
-					: Builders<EventEntity>.Sort.Ascending(e => e.ParticipantIds.Count),
-					*/
+					? query.OrderByDescending(e => e.Participants.Count)
+					: query.OrderBy(e => e.Participants.Count),
 				_ => options.SortDescending
-					? Builders<EventEntity>.Sort.Descending(e => e.CreatedAt)
-					: Builders<EventEntity>.Sort.Ascending(e => e.CreatedAt)
+					? query.OrderByDescending(e => e.CreatedAt)
+					: query.OrderBy(e => e.CreatedAt)
 			};
 
-			return await collection
-				.Find(finalFilter)
-				.Sort(sort)
+			return await query
 				.Skip((options.Page - 1) * options.PageSize)
-				.Limit(options.PageSize)
+				.Take(options.PageSize)
 				.ToListAsync();
 		}
 
 		public async Task<bool> UpdateEvent(EventEntity updatedEvent)
 		{
-			var filter = Builders<EventEntity>.Filter.Eq(e => e.Id, updatedEvent.Id);
-			updatedEvent.UpdatedAt = DateTime.UtcNow;
-
-			var result = await _dbContext.GetCollection<EventEntity>()
-				.ReplaceOneAsync(filter, updatedEvent);
-
-			return result.ModifiedCount > 0;
+			updatedEvent.UpdatedAt = DateTimeOffset.UtcNow;
+			_dbContext.Events.Update(updatedEvent);
+			var result = await _dbContext.SaveChangesAsync();
+			return result > 0;
 		}
 
-		public async Task<bool> DeleteEvent(ObjectId eventId)
+		public async Task<bool> DeleteEvent(Guid eventId)
 		{
-			var filter = Builders<EventEntity>.Filter.Eq(e => e.Id, eventId);
-			var result = await _dbContext.GetCollection<EventEntity>().DeleteOneAsync(filter);
-			return result.DeletedCount > 0;
+			var eventEntity = await _dbContext.Events.FindAsync(eventId);
+			if (eventEntity != null)
+			{
+				_dbContext.Events.Remove(eventEntity);
+				var result = await _dbContext.SaveChangesAsync();
+				return result > 0;
+			}
+			return false;
 		}
 	}
 }

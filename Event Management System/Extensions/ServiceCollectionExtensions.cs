@@ -3,14 +3,14 @@ using Core.Interfaces;
 using Core.Options;
 using Infrastructure.Interfaces;
 using Infrastructure.Mapping.Profiles;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Entity;
-using Infrastructure.Persistence.MongoDb;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MongoDB.Driver;
 using System.Text;
 
 namespace Api.Extensions
@@ -21,7 +21,7 @@ namespace Api.Extensions
 		{
 			services.AddHttpServices();
 			services.AddApplicationServices(configuration);
-			services.AddMongoDbServices(configuration);
+			services.AddDbServices(configuration);
 			services.AddJwtAuthentication(configuration);
 
 			return services;
@@ -54,21 +54,16 @@ namespace Api.Extensions
 			return services;
 		}
 
-		private static IServiceCollection AddMongoDbServices(this IServiceCollection services, IConfiguration configuration)
+		private static IServiceCollection AddDbServices(this IServiceCollection services, IConfiguration configuration)
 		{
-			services.Configure<MongoDbOptions>(configuration.GetSection(nameof(MongoDbOptions)));
-
-			services.AddScoped<IMongoClient>(sp =>
+			services.AddDbContext<ApplicationDbContext>(options =>
 			{
-				string connectionString = configuration.GetConnectionString("MongoDb")!;
-				var settings = MongoClientSettings.FromConnectionString(connectionString);
-				settings.ServerApi = new ServerApi(ServerApiVersion.V1);
-				var client = new MongoClient(settings);
+				options.UseNpgsql(configuration.GetConnectionString("PostgreSql"));
 
-				return client;
+				options.EnableSensitiveDataLogging();
+				options.LogTo(Console.WriteLine);
 			});
 
-			services.AddScoped<IMongoDbContext, MongoDbContext>();
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IParticipantRepository, ParticipantRepository>();
 			services.AddScoped<IEventRepository, EventRepository>();

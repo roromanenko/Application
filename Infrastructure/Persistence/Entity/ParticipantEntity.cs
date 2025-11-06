@@ -1,22 +1,29 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Infrastructure.Persistence.Entity
 {
-	[Table("participant")]
+	[Table("participants")]
 	public class ParticipantEntity
 	{
-		[BsonId]
-		public ObjectId Id { get; set; }
+		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public Guid Id { get; set; }
 
-		[BsonRequired]
-		public string FollowerId { get; set; } = string.Empty;
+		[Required]
+		public Guid UserId { get; set; }
 
-		[BsonRequired]
-		public string TargetId { get; set; } = string.Empty;
+		[Required]
+		public Guid EventId { get; set; }
 
-		[BsonRequired]
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+		[Required]
+		public DateTimeOffset CreatedAt { get; set; }
+
+		// Navigation properties
+		[ForeignKey(nameof(UserId))]
+		public UserEntity User { get; set; } = null!;
+
+		[ForeignKey(nameof(EventId))]
+		public EventEntity Event { get; set; } = null!;
 	}
 }

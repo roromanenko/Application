@@ -9,12 +9,12 @@ namespace Core.Interfaces
 {
 	public interface IParticipantService
 	{
-		Task<Participant> SubscribeAsync(string followerId, string targetId);
-		Task<bool> UnsubscribeAsync(string followerId, string targetId);
+		Task<Participant> SubscribeAsync(string userId, string eventId);
+		Task<bool> UnsubscribeAsync(string userId, string eventId);
 
-		Task<IEnumerable<Participant>> GetFollowingAsync(string followerId);
-		Task<IEnumerable<Participant>> GetFollowersAsync(string targetId);
+		Task<IEnumerable<Participant>> GetFollowingAsync(string userId);
+		Task<IEnumerable<Participant>> GetFollowersAsync(string eventId);
 
-		Task<bool> IsFollowingAsync(string followerId, string targetId);
+		Task<bool> IsFollowingAsync(string userId, string eventId);
 	}
 }

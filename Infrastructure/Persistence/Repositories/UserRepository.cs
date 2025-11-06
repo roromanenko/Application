@@ -1,80 +1,73 @@
-﻿using Core.Interfaces;
-using Core.Options;
-using Infrastructure.Interfaces;
+﻿using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
 	public class UserRepository : IUserRepository
 	{
-		private readonly MongoDbOptions _mongoDbOptions;
-		private readonly IMongoDbContext _dbContext;
+		private readonly ApplicationDbContext _dbContext;
 
-		public UserRepository(IOptions<MongoDbOptions> mongoDbOptions, IMongoDbContext mongoDbContext)
+		public UserRepository(ApplicationDbContext dbContext)
 		{
-			_mongoDbOptions = mongoDbOptions.Value;
-			_dbContext = mongoDbContext;
+			_dbContext = dbContext;
 		}
 
 		public async Task<UserEntity> CreateUser(UserEntity newUser)
 		{
-			await _dbContext.GetCollection<UserEntity>().InsertOneAsync(newUser);
+			await _dbContext.Users.AddAsync(newUser);
+			await _dbContext.SaveChangesAsync();
 			return newUser;
 		}
 
-		public async Task<UserEntity> GetUserByUsernameOrEmail(string usernameOrEmail)
+		public async Task<UserEntity?> GetUserByUsernameOrEmail(string usernameOrEmail)
 		{
-			var filter = Builders<UserEntity>.Filter.Or(
-				Builders<UserEntity>.Filter.Eq(u => u.Username, usernameOrEmail),
-				Builders<UserEntity>.Filter.Eq(u => u.Email, usernameOrEmail)
-			);
-			var user = await _dbContext.GetCollection<UserEntity>().Find(filter).FirstOrDefaultAsync();
-
+			var user = await _dbContext.Users
+				.FirstOrDefaultAsync(u => u.Username == usernameOrEmail || u.Email == usernameOrEmail);
 			return user;
 		}
 
-		public async Task<UserEntity> GetUserById(ObjectId userid)
+		public async Task<UserEntity?> GetUserById(Guid userid)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Id, userid);
-			var user = await _dbContext.GetCollection<UserEntity>().Find(filter).FirstOrDefaultAsync();
+			var user = await _dbContext.Users
+				.FirstOrDefaultAsync(u => u.Id == userid);
 			return user;
 		}
 
-		public Task UpdateUser(UserEntity user)
+		public async Task UpdateUser(UserEntity user)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Id, user.Id);
-
-			return _dbContext.GetCollection<UserEntity>().ReplaceOneAsync(filter, user);
+			_dbContext.Users.Update(user);
+			await _dbContext.SaveChangesAsync();
 		}
 
-		public Task ChangePassword(ObjectId userId, string newPasswordHash)
+		public async Task ChangePassword(Guid userId, string newPasswordHash)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Id, userId);
-			var update = Builders<UserEntity>.Update.Set(x => x.PasswordHash, newPasswordHash);
-
-			return _dbContext.GetCollection<UserEntity>().UpdateOneAsync(filter, update);
+			var user = await _dbContext.Users.FindAsync(userId);
+			if (user != null)
+			{
+				user.PasswordHash = newPasswordHash;
+				await _dbContext.SaveChangesAsync();
+			}
 		}
 
-		public async Task DeleteUser(ObjectId userId)
+		public async Task DeleteUser(Guid userId)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Id, userId);
-			await _dbContext.GetCollection<UserEntity>().DeleteOneAsync(filter);
+			var user = await _dbContext.Users.FindAsync(userId);
+			if (user != null)
+			{
+				_dbContext.Users.Remove(user);
+				await _dbContext.SaveChangesAsync();
+			}
 		}
 
 		public async Task<IEnumerable<UserEntity>> GetAllUsers()
 		{
-			return await _dbContext.GetCollection<UserEntity>().Find(_ => true).ToListAsync();
+			return await _dbContext.Users.ToListAsync();
 		}
 
 		public async Task<bool> UserExistsByUsername(string username)
 		{
-			var filter = Builders<UserEntity>.Filter.Eq(u => u.Username, username);
-			var count = await _dbContext.GetCollection<UserEntity>().CountDocumentsAsync(filter);
-			return count > 0;
+			return await _dbContext.Users.AnyAsync(u => u.Username == username);
 		}
 	}
 }

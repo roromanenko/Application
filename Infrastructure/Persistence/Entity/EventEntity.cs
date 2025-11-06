@@ -1,38 +1,48 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Entity
 {
-	[Table("event")]
+	[Table("events")]
 	public class EventEntity
 	{
-		[BsonId]
-		public ObjectId Id { get; set; }
+		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public Guid Id { get; set; }
 
-		[BsonRequired]
-		public string Title { get; set; }
-		public string Description { get; set; }
+		[Required]
+		[MaxLength(200)]
+		public string Title { get; set; } = string.Empty;
 
-		[BsonRequired]
-		public string OrganizerId { get; set; } = string.Empty;
+		[MaxLength(2000)]
+		public string? Description { get; set; }
+
+		[Required]
+		public Guid OrganizerId { get; set; }
+
+		[Required]
 		public DateTimeOffset StartDate { get; set; }
+
+		[Required]
 		public DateTimeOffset EndDate { get; set; }
+
+		[MaxLength(500)]
 		public string? Location { get; set; }
 
-		[BsonDefaultValue(true)]
-		public bool IsPublic { get; set; }
+		public bool IsPublic { get; set; } = true;
+
 		public int Capacity { get; set; }
 
-		[BsonRequired] 
-		public DateTimeOffset CreatedAt { get; set; } = DateTime.UtcNow;
+		[Required]
+		public DateTimeOffset CreatedAt { get; set; }
 
-		[BsonRequired] 
-		public DateTimeOffset UpdatedAt { get; set; } = DateTime.UtcNow;
+		[Required]
+		public DateTimeOffset UpdatedAt { get; set; }
+
+		// Navigation properties
+		[ForeignKey(nameof(OrganizerId))]
+		public UserEntity Organizer { get; set; } = null!;
+
+		public ICollection<ParticipantEntity> Participants { get; set; } = new List<ParticipantEntity>();
 	}
 }

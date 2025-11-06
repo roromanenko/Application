@@ -9,8 +9,8 @@ namespace Core.Domain
 	public sealed class Participant
 	{
 		public required string Id { get; init; }
-		public required string FollowerId { get; init; }
-		public required string TargetId { get; init; }
+		public required string UserId { get; init; }
+		public required string EventId { get; init; }
 		public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 	}
 }

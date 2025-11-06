@@ -3,8 +3,8 @@
 	public record ParticipantDto
 	(
 		string Id,
-		string FollowerId,
-		string TargetId,
+		string UserId,
+		string EventId,
 		DateTime CreatedAt
 	);
 }

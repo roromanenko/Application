@@ -4,7 +4,6 @@ using Core.Interfaces;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
 using Microsoft.AspNetCore.Identity;
-using MongoDB.Bson;
 
 namespace Infrastructure.Services
 {
@@ -54,16 +53,19 @@ namespace Infrastructure.Services
 				LastName = lastName,
 				Roles = ["user"]
 			};
-			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 
+			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 			newUser = await _userRepository.CreateUser(newUser);
+
 			return _mapper.Map<User>(newUser);
 		}
 
 		public async Task<User> GetUserById(string userId)
 		{
-			UserEntity userEntity = await _userRepository.GetUserById(ObjectId.Parse(userId));
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
 
+			UserEntity? userEntity = await _userRepository.GetUserById(userGuid);
 			return userEntity is null
 				? throw new KeyNotFoundException($"User with ID '{userId}' was not found.")
 				: _mapper.Map<User>(userEntity);
@@ -76,9 +78,14 @@ namespace Infrastructure.Services
 
 		public async Task ChangePassword(string userId, string newPassword)
 		{
-			var user = await _userRepository.GetUserById(ObjectId.Parse(userId)) ?? throw new ArgumentException("User not found");
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
+
+			var user = await _userRepository.GetUserById(userGuid)
+				?? throw new ArgumentException("User not found");
+
 			var hashedPassword = _passwordHasher.HashPassword(user, newPassword);
-			await _userRepository.ChangePassword(ObjectId.Parse(userId), hashedPassword);
+			await _userRepository.ChangePassword(userGuid, hashedPassword);
 		}
 	}
 }
