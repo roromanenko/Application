@@ -4,13 +4,13 @@
       <span class="logo-text">Event<span class="logo-accent">Manager</span></span>
     </a>
     <div class="nav-links">
-      <a *ngIf="!(isLoggedIn$ | async)"
+      <a *ngIf="!isLoggedIn"
          routerLink="/"
          class="nav-link"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/events" class="nav-link" routerLinkActive="active">Events</a>
-      <a *ngIf="isLoggedIn$ | async"
+      <a *ngIf="isLoggedIn"
          routerLink="/calendar"
          class="nav-link"
          routerLinkActive="active">Calendar</a>
@@ -18,7 +18,7 @@
   </div>
   <div class="nav-right">
     <!-- Non-authenticated -->
-    <ng-container *ngIf="!(isLoggedIn$ | async); else loggedInMenu">
+    <ng-container *ngIf="!isLoggedIn; else loggedInMenu">
       <a routerLink="/login" class="btn btn-login">Login</a>
       <a routerLink="/register" class="btn btn-register">Get Started</a>
     </ng-container>

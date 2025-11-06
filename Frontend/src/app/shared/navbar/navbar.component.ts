@@ -15,7 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class NavbarComponent implements OnInit {
   user: UserDto | null = null;
-
+  isLoggedIn = false;
   constructor(
     private client: Client,
     private router: Router,
@@ -29,6 +29,7 @@ export class NavbarComponent implements OnInit {
   {
     this.authService.isLoggedIn$.subscribe(isLoggedIn =>
     {
+      this.isLoggedIn = isLoggedIn;
       if (isLoggedIn)
       {
         this.loadUserProfile();

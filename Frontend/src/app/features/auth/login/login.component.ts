@@ -48,7 +48,7 @@ export class LoginComponent {
           this.authService.login(token, storage, response.data?.user);
 
           this.notification.success('Welcome back! Login successful.');
-          setTimeout(() => this.router.navigate(['/']), 1000);
+          this.router.navigate(['/']);
         }
         else
         {
