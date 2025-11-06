@@ -38,9 +38,8 @@ export class ProfileComponent implements OnInit {
     this.loadSubscribedEvents();
   }
 
-  getParticipantCount(eventId: string | undefined): number {
-    if (!eventId) return 0;
-    return this.participantCounts.get(eventId) || 0;
+  getParticipantCount(eventId?: string): number {
+    return eventId ? this.participantCounts.get(eventId) ?? 0 : 0;
   }
 
   loadUserProfile() {
@@ -64,14 +63,20 @@ export class ProfileComponent implements OnInit {
 
   loadSubscribedEvents() {
     this.isLoadingEvents = true;
-    this.subscribedEvents = [];
-    this.isLoadingEvents = false;
 
-    /*
-    this.client.getFollowing('Event').subscribe({
+    const userString = localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY);
+    if (!userString) {
+      this.isLoadingEvents = false;
+      return;
+    }
+
+    const user = JSON.parse(userString);
+    const userId = user.id || user.userId;
+
+    this.client.following(userId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          const eventIds = response.data.map(sub => sub.targetId);
+          const eventIds = response.data.map((sub: any) => sub.eventId);
           this.loadEventDetails(eventIds, 'subscribed');
         } else {
           this.isLoadingEvents = false;
@@ -82,7 +87,6 @@ export class ProfileComponent implements OnInit {
         this.isLoadingEvents = false;
       }
     });
-    */
   }
 
   loadMyEvents() {
@@ -92,9 +96,22 @@ export class ProfileComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.myEvents = response.data.map(e => EventDto.fromJS(e));
+
+          for (const event of this.myEvents) {
+            if (!event.id) continue;
+            this.client.count(event.id).subscribe({
+              next: (countRes) => {
+                if (countRes.success && countRes.data !== undefined) {
+                  this.participantCounts.set(event.id!, countRes.data);
+                }
+              },
+              error: (err) => console.error(`Error loading participant count for ${event.id}:`, err)
+            });
+          }
         } else {
           this.myEvents = [];
         }
+
         this.isLoadingEvents = false;
       },
       error: (err) => {
@@ -126,12 +143,24 @@ export class ProfileComponent implements OnInit {
 
         for (const res of responses) {
           if (res && res.success && res.data) {
-            events.push(EventDto.fromJS(res.data));
+            const event = EventDto.fromJS(res.data);
+            events.push(event);
+
+            this.client.count(event.id!).subscribe({
+              next: (countRes) => {
+                if (countRes.success && countRes.data !== undefined) {
+                  this.participantCounts.set(event.id!, countRes.data);
+                }
+              },
+              error: (err) => console.error('Error loading participant count:', err)
+            });
           }
         }
 
         if (type === 'subscribed') {
           this.subscribedEvents = events;
+        } else {
+          this.myEvents = events;
         }
 
         this.isLoadingEvents = false;

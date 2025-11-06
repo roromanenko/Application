@@ -21,7 +21,6 @@
       <div class="profile-info">
         <h1>{{ user?.firstName }} {{ user?.lastName }}</h1>
         <p class="username">@{{ user?.username }}</p>
-        <!-- Email убран, так как его нет в UserDto -->
       </div>
 
       <div class="profile-actions">
@@ -99,24 +98,27 @@
 
           <div class="event-meta">
             <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M8 7V3M16 7V3M7 11H17M5 21H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               {{ formatDate(event.startDate) }}
             </div>
 
             <div class="meta-item" *ngIf="event.location">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               {{ event.location }}
             </div>
 
             <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M17 21V19M9 11C11.2 11 13 9.2 13 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16 3.12988C17.7252 3.57393 19 5.13999 19 7.00098C19 8.86196 17.7252 10.428 16 10.872" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              {{ getParticipantCount(event.id) }}{{ event.capacity && event.capacity > 0 ? '/' + event.capacity : '' }} participants
+              {{ getParticipantCount(event.id ?? '') }}{{ (event.capacity ?? 0) > 0 ? '/' + event.capacity : '' }}
             </div>
           </div>
         </div>
@@ -155,7 +157,7 @@
             </div>
 
             <div class="meta-item">
-              {{ getParticipantCount(event.id) }}{{ event.capacity && event.capacity > 0 ? '/' + event.capacity : '' }} participants
+              {{ getParticipantCount(event.id ?? '') }}{{ (event.capacity ?? 0) > 0 ? '/' + event.capacity : '' }} participants
             </div>
           </div>
 

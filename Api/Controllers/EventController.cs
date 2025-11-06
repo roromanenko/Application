@@ -134,7 +134,6 @@ namespace Api.Controllers
 
 			var allEvents = await _eventService.GetEventsAsync(options, includePrivate: false);
 			var popular = allEvents
-				//.OrderByDescending(e => e.ParticipantIds?.Count ?? 0)
 				.ToList();
 
 			var eventDtos = _mapper.Map<IEnumerable<EventDto>>(popular);
@@ -173,36 +172,6 @@ namespace Api.Controllers
 				return Ok(new ApiResponse<bool>(false, "Event not found or already deleted"));
 
 			return Ok(new ApiResponse<bool>(true, "Event deleted successfully", true));
-		}
-
-		[HttpPost("{id}/join")]
-		[Authorize]
-		public async Task<ActionResult<ApiResponse<bool>>> JoinEvent(string id)
-		{
-			try
-			{
-				var success = await _eventService.JoinEventAsync(id, UserId!);
-				return Ok(new ApiResponse<bool>(true, "Joined successfully", success));
-			}
-			catch (Exception ex)
-			{
-				return Ok(new ApiResponse<bool>(false, ex.Message));
-			}
-		}
-
-		[HttpPost("{id}/leave")]
-		[Authorize]
-		public async Task<ActionResult<ApiResponse<bool>>> LeaveEvent(string id)
-		{
-			try
-			{
-				var success = await _eventService.LeaveEventAsync(id, UserId!);
-				return Ok(new ApiResponse<bool>(true, "Left successfully", success));
-			}
-			catch (Exception ex)
-			{
-				return Ok(new ApiResponse<bool>(false, ex.Message));
-			}
 		}
 
 		[HttpGet("{id}/participants/count")]

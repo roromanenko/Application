@@ -9,12 +9,14 @@ namespace Infrastructure.Services
 	public class ParticipantService : IParticipantService
 	{
 		private readonly IParticipantRepository _participantRepository;
+		IUserRepository _userRepository;
 		private readonly IMapper _mapper;
 
-		public ParticipantService(IParticipantRepository participantRepository, IMapper mapper)
+		public ParticipantService(IParticipantRepository participantRepository, IMapper mapper, IUserRepository userRepository)
 		{
 			_participantRepository = participantRepository;
 			_mapper = mapper;
+			_userRepository = userRepository;
 		}
 
 		public async Task<Participant> SubscribeAsync(string userId, string eventId)
@@ -72,8 +74,19 @@ namespace Infrastructure.Services
 			if (!Guid.TryParse(eventId, out var eventGuid))
 				throw new ArgumentException("Invalid event ID format");
 
-			var entities = await _participantRepository.GetByTarget(eventGuid);
-			return _mapper.Map<IEnumerable<Participant>>(entities);
+			var participantEntities = await _participantRepository.GetByTarget(eventGuid);
+			var participants = _mapper.Map<IEnumerable<Participant>>(participantEntities);
+
+			foreach (var participant in participants)
+			{
+				var userEntity = await _userRepository.GetUserById(Guid.Parse(participant.UserId));
+				if (userEntity != null)
+				{
+					participant.User = _mapper.Map<User>(userEntity);
+				}
+			}
+
+			return participants;
 		}
 
 		public async Task<bool> IsFollowingAsync(string userId, string eventId)

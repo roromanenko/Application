@@ -46,7 +46,7 @@ namespace Api.Extensions
 				cfg.AddProfile<UserProfile>();
 				cfg.AddProfile<UserDtoProfile>();
 				cfg.AddProfile<ParticipantProfile>();
-				cfg.AddProfile<SubscriptionDtoProfile>();
+				cfg.AddProfile<ParticipantDtoProfile>();
 				cfg.AddProfile<EventProfile>();
 				cfg.AddProfile<EventDtoProfile>();
 			});

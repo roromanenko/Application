@@ -4,9 +4,9 @@ using Core.Domain;
 
 namespace Api.Mapping.Profiles
 {
-	public class SubscriptionDtoProfile : Profile
+	public class ParticipantDtoProfile : Profile
 	{
-		public SubscriptionDtoProfile()
+		public ParticipantDtoProfile()
 		{
 			CreateMap<Participant, ParticipantDto>().ReverseMap();
 		}

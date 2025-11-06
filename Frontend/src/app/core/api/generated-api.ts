@@ -510,11 +510,65 @@ export class Client {
     /**
      * @return OK
      */
-    join(id: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}/join";
+    count(id: string): Observable<Int32ApiResponse> {
+        let url_ = this.baseUrl + "/api/Event/{id}/participants/count";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCount(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCount(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<Int32ApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<Int32ApiResponse>;
+        }));
+    }
+
+    protected processCount(response: HttpResponseBase): Observable<Int32ApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Int32ApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    join(eventId: string): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/join";
+        if (eventId === undefined || eventId === null)
+            throw new globalThis.Error("The parameter 'eventId' must be defined.");
+        url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -564,11 +618,11 @@ export class Client {
     /**
      * @return OK
      */
-    leave(id: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}/leave";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    leave(eventId: string): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/leave";
+        if (eventId === undefined || eventId === null)
+            throw new globalThis.Error("The parameter 'eventId' must be defined.");
+        url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -618,11 +672,11 @@ export class Client {
     /**
      * @return OK
      */
-    count(id: string): Observable<Int32ApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}/participants/count";
-        if (id === undefined || id === null)
-            throw new globalThis.Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    followers(eventId: string): Observable<ParticipantDtoIEnumerableApiResponse> {
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/followers";
+        if (eventId === undefined || eventId === null)
+            throw new globalThis.Error("The parameter 'eventId' must be defined.");
+        url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -634,20 +688,20 @@ export class Client {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processCount(response_);
+            return this.processFollowers(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processCount(response_ as any);
+                    return this.processFollowers(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<Int32ApiResponse>;
+                    return _observableThrow(e) as any as Observable<ParticipantDtoIEnumerableApiResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<Int32ApiResponse>;
+                return _observableThrow(response_) as any as Observable<ParticipantDtoIEnumerableApiResponse>;
         }));
     }
 
-    protected processCount(response: HttpResponseBase): Observable<Int32ApiResponse> {
+    protected processFollowers(response: HttpResponseBase): Observable<ParticipantDtoIEnumerableApiResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -658,7 +712,117 @@ export class Client {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = Int32ApiResponse.fromJS(resultData200);
+            result200 = ParticipantDtoIEnumerableApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    isFollowing(eventId: string): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/is-following";
+        if (eventId === undefined || eventId === null)
+            throw new globalThis.Error("The parameter 'eventId' must be defined.");
+        url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIsFollowing(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIsFollowing(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BooleanApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BooleanApiResponse>;
+        }));
+    }
+
+    protected processIsFollowing(response: HttpResponseBase): Observable<BooleanApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BooleanApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param userId (optional) 
+     * @return OK
+     */
+    following(userId?: string | undefined): Observable<ParticipantDtoIEnumerableApiResponse> {
+        let url_ = this.baseUrl + "/api/Participant/following?";
+        if (userId === null)
+            throw new globalThis.Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processFollowing(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processFollowing(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ParticipantDtoIEnumerableApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ParticipantDtoIEnumerableApiResponse>;
+        }));
+    }
+
+    protected processFollowing(response: HttpResponseBase): Observable<ParticipantDtoIEnumerableApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ParticipantDtoIEnumerableApiResponse.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -1375,6 +1539,110 @@ export interface ILoginResponseApiResponse {
     success?: boolean;
     message?: string | undefined;
     data?: LoginResponse;
+}
+
+export class ParticipantDto implements IParticipantDto {
+    id?: string | undefined;
+    userId?: string | undefined;
+    eventId?: string | undefined;
+    createdAt?: Date;
+    user?: UserDto;
+
+    constructor(data?: IParticipantDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userId = _data["userId"];
+            this.eventId = _data["eventId"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : undefined as any;
+            this.user = _data["user"] ? UserDto.fromJS(_data["user"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): ParticipantDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ParticipantDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userId"] = this.userId;
+        data["eventId"] = this.eventId;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : undefined as any;
+        data["user"] = this.user ? this.user.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface IParticipantDto {
+    id?: string | undefined;
+    userId?: string | undefined;
+    eventId?: string | undefined;
+    createdAt?: Date;
+    user?: UserDto;
+}
+
+export class ParticipantDtoIEnumerableApiResponse implements IParticipantDtoIEnumerableApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: ParticipantDto[] | undefined;
+
+    constructor(data?: IParticipantDtoIEnumerableApiResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(ParticipantDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ParticipantDtoIEnumerableApiResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new ParticipantDtoIEnumerableApiResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IParticipantDtoIEnumerableApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: ParticipantDto[] | undefined;
 }
 
 export class RegisterRequest implements IRegisterRequest {
