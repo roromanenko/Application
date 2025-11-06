@@ -11,6 +11,6 @@ namespace Core.Domain
 		public required string Id { get; init; }
 		public required string UserId { get; init; }
 		public required string EventId { get; init; }
-		public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+		public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 	}
 }
