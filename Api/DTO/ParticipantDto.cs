@@ -5,7 +5,7 @@
 		string Id,
 		string UserId,
 		string EventId,
-		DateTime CreatedAt,
+		DateTimeOffset CreatedAt,
 		UserDto? User
 	);
 }

@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Api.Middlewares;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
@@ -83,6 +84,8 @@ if (!app.Environment.IsDevelopment())
 {
 	app.UseHttpsRedirection();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

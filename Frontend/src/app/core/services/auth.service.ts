@@ -21,6 +21,7 @@ export class AuthService {
 
   logout(storage: any) {
     storage.removeItem(constants.TOKEN_KEY);
+    storage.removeItem(constants.USER_KEY);
     this.isLoggedInSubject.next(false);
   }
 

@@ -1,5 +1,6 @@
 ﻿using Api.DTO;
 using AutoMapper;
+using Core.Domain;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,8 +29,8 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> JoinEvent(string eventId)
 		{
-			if (string.IsNullOrWhiteSpace(eventId))
-				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse<bool>(false, "Validation failed"));
 
 			try
 			{
@@ -39,7 +40,7 @@ namespace Api.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error joining event");
-				return Ok(new ApiResponse<bool>(false, ex.Message));
+				return StatusCode(500, new ApiResponse<bool>(false, ex.Message));
 			}
 		}
 
@@ -47,8 +48,8 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> LeaveEvent(string eventId)
 		{
-			if (string.IsNullOrWhiteSpace(eventId))
-				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse<bool>(false, "Validation failed"));
 
 			try
 			{
@@ -58,7 +59,7 @@ namespace Api.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error leaving event");
-				return Ok(new ApiResponse<bool>(false, ex.Message));
+				return StatusCode(500, new ApiResponse<bool>(false, ex.Message));
 			}
 		}
 
@@ -66,21 +67,20 @@ namespace Api.Controllers
 		[AllowAnonymous]
 		public async Task<ActionResult<ApiResponse<IEnumerable<ParticipantDto>>>> GetEventFollowers(string eventId)
 		{
-			if (string.IsNullOrWhiteSpace(eventId))
-				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "Event ID is required"));
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "Validation failed"));
 
 			var participants = await _participantService.GetFollowersAsync(eventId);
-			var participantDtos = _mapper.Map<IEnumerable<ParticipantDto>>(participants);
 
-			return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(true, "Participants retrieved", participantDtos));
+			return Ok(new ApiResponse<IEnumerable<Participant>>(true, "Participants retrieved", participants));
 		}
 
 		[HttpGet("{eventId}/is-following")]
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> IsFollowing(string eventId)
 		{
-			if (string.IsNullOrWhiteSpace(eventId))
-				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse<bool>(false, "Validation failed"));
 
 			var isFollowing = await _participantService.IsFollowingAsync(UserId!, eventId);
 			return Ok(new ApiResponse<bool>(true, "Check complete", isFollowing));
@@ -90,12 +90,13 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<IEnumerable<ParticipantDto>>>> GetFollowing([FromQuery] string userId)
 		{
-			if (string.IsNullOrWhiteSpace(userId))
-				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "User ID is required"));
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "Validation failed"));
 
 			try
 			{
 				var subscriptions = await _participantService.GetFollowingAsync(userId);
+
 				var subscriptionDtos = _mapper.Map<IEnumerable<ParticipantDto>>(subscriptions);
 
 				return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(true, "Following events retrieved", subscriptionDtos));
@@ -103,7 +104,7 @@ namespace Api.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error retrieving following events");
-				return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(false, ex.Message));
+				return StatusCode(500, new ApiResponse<IEnumerable<ParticipantDto>>(false, ex.Message));
 			}
 		}
 	}

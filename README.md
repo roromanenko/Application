@@ -59,10 +59,6 @@ Development Database
 - Username `postgres`
 - Password `postgres_dev_password`
 
-Test User (if seed data is available)
-- Email `test@example.com`
-- Password `Test123!`
-
 ## Development
 
 ### View Logs
