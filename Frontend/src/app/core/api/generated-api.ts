@@ -1002,6 +1002,62 @@ export class Client {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    profile(body?: UpdateUserRequest | undefined): Observable<StringApiResponse> {
+        let url_ = this.baseUrl + "/api/User/profile";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processProfile(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processProfile(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<StringApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<StringApiResponse>;
+        }));
+    }
+
+    protected processProfile(response: HttpResponseBase): Observable<StringApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @return OK
      */
     me(): Observable<UserDtoApiResponse> {
@@ -1805,9 +1861,58 @@ export interface IUpdateEventRequest {
     isPublic?: boolean;
 }
 
+export class UpdateUserRequest implements IUpdateUserRequest {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    username?: string | undefined;
+    email?: string | undefined;
+
+    constructor(data?: IUpdateUserRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.username = _data["username"];
+            this.email = _data["email"];
+        }
+    }
+
+    static fromJS(data: any): UpdateUserRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateUserRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["username"] = this.username;
+        data["email"] = this.email;
+        return data;
+    }
+}
+
+export interface IUpdateUserRequest {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    username?: string | undefined;
+    email?: string | undefined;
+}
+
 export class UserDto implements IUserDto {
     id?: string | undefined;
     username?: string | undefined;
+    email?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
     roles?: string[] | undefined;
@@ -1825,6 +1930,7 @@ export class UserDto implements IUserDto {
         if (_data) {
             this.id = _data["id"];
             this.username = _data["username"];
+            this.email = _data["email"];
             this.firstName = _data["firstName"];
             this.lastName = _data["lastName"];
             if (Array.isArray(_data["roles"])) {
@@ -1846,6 +1952,7 @@ export class UserDto implements IUserDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["username"] = this.username;
+        data["email"] = this.email;
         data["firstName"] = this.firstName;
         data["lastName"] = this.lastName;
         if (Array.isArray(this.roles)) {
@@ -1860,6 +1967,7 @@ export class UserDto implements IUserDto {
 export interface IUserDto {
     id?: string | undefined;
     username?: string | undefined;
+    email?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
     roles?: string[] | undefined;

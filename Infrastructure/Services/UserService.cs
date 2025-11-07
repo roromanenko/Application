@@ -71,9 +71,19 @@ namespace Infrastructure.Services
 				: _mapper.Map<User>(userEntity);
 		}
 
-		public async Task UpdateUser(User user)
+		public async Task<bool> UpdateUser(User user)
 		{
-			await _userRepository.UpdateUser(_mapper.Map<UserEntity>(user));
+			var existingUser = await _userRepository.GetUserById(Guid.Parse(user.Id));
+			if (existingUser == null)
+				return false;
+
+			existingUser.FirstName = user.FirstName;
+			existingUser.LastName = user.LastName;
+			existingUser.Email = user.Email;
+			existingUser.Username = user.Username;
+
+			await _userRepository.UpdateUser(existingUser);
+			return true;
 		}
 
 		public async Task ChangePassword(string userId, string newPassword)

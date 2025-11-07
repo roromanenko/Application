@@ -84,6 +84,34 @@ namespace Api.Controllers
 			}
 		}
 
+		[HttpPut("profile")]
+		[Authorize]
+		public async Task<ActionResult<ApiResponse<string>>> UpdateProfile([FromBody] UpdateUserRequest request)
+		{
+			var user = await _userService.GetUserById(UserId!);
+
+			if (user == null)
+				return Ok(new ApiResponse<string>(false, "User not found"));
+
+			if (!string.IsNullOrWhiteSpace(request.FirstName))
+				user.FirstName = request.FirstName;
+
+			if (!string.IsNullOrWhiteSpace(request.LastName))
+				user.LastName = request.LastName;
+
+			if (!string.IsNullOrWhiteSpace(request.Username))
+				user.Username = request.Username;
+
+			if (!string.IsNullOrWhiteSpace(request.Email))
+				user.Email = request.Email;
+
+			var success = await _userService.UpdateUser(user);
+			if (!success)
+				return Ok(new ApiResponse<string>(false, "User not found"));
+
+			return Ok(new ApiResponse<string>(true, "Profile updated successfully"));
+		}
+
 		[HttpGet("me")]
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<UserDto>>> GetCurrentUser()
