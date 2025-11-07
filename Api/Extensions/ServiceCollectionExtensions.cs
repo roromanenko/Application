@@ -1,6 +1,8 @@
 ﻿using Api.Mapping.Profiles;
 using Core.Interfaces;
 using Core.Options;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure.Interfaces;
 using Infrastructure.Mapping.Profiles;
 using Infrastructure.Persistence;
@@ -23,6 +25,7 @@ namespace Api.Extensions
 			services.AddApplicationServices(configuration);
 			services.AddDbServices(configuration);
 			services.AddJwtAuthentication(configuration);
+			services.AddValidationServices();
 			return services;
 		}
 
@@ -130,6 +133,13 @@ namespace Api.Extensions
 				};
 			});
 
+			return services;
+		}
+
+		private static IServiceCollection AddValidationServices(this IServiceCollection services)
+		{
+			services.AddFluentValidationAutoValidation();
+			services.AddValidatorsFromAssemblyContaining<Program>();
 			return services;
 		}
 	}

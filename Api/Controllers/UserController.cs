@@ -24,38 +24,23 @@ namespace Api.Controllers
 		}
 
 		[HttpPost("register")]
-		public async Task<ActionResult<ApiResponse<UserDto>>> Register(RegisterRequest request)
+		public async Task<ActionResult<ApiResponse<UserDto>>> Register([FromBody] RegisterRequest request)
 		{
-			try
-			{
-				// Password validation
-				if (request.Password != request.ConfirmPassword)
-					return Ok(new ApiResponse<UserDto>(false, "Passwords do not match"));
+			var user = await _userService.RegisterUser(
+				request.Username, request.Email, request.FirstName, request.LastName, request.Password);
 
-				var user = await _userService.RegisterUser(request.Username, request.Email, request.FirstName, request.LastName, request.Password);
-
-				var response = _mapper.Map<UserDto>(user);
-				return Ok(new ApiResponse<UserDto>(true, "User registered successfully", response));
-			}
-			catch (ArgumentException ex)
-			{
-				return Ok(new ApiResponse<UserDto>(false, ex.Message));
-			}
-			catch (Exception)
-			{
-				return Ok(new ApiResponse<UserDto>(false, "Registration failed"));
-			}
+			var response = _mapper.Map<UserDto>(user);
+			return Ok(new ApiResponse<UserDto>(true, "User registered successfully", response));
 		}
 
 		[HttpPost("login")]
-		public async Task<ActionResult<ApiResponse<LoginResponse>>> Login(LoginRequest request)
+		public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
 		{
 			var user = await _userService.VerifyUserLogin(request.UsernameOrEmail, request.Password);
 			if (user == null)
 				return Ok(new ApiResponse<LoginResponse>(false, "Invalid credentials"));
 
 			var token = _jwtService.GenerateToken(user);
-
 			var userResponse = _mapper.Map<UserDto>(user);
 			var loginResponse = new LoginResponse(userResponse, token);
 
@@ -66,22 +51,12 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<string>>> ChangePassword([FromBody] ChangePasswordRequest request)
 		{
-			try
-			{
-				var user = await _userService.VerifyUserLogin(Username!, request.CurrentPassword);
-				if (user == null)
-					return Ok(new ApiResponse<string>(false, "Current password is incorrect"));
+			var user = await _userService.VerifyUserLogin(Username!, request.CurrentPassword);
+			if (user == null)
+				return Ok(new ApiResponse<string>(false, "Current password is incorrect"));
 
-				if (request.NewPassword != request.ConfirmPassword)
-					return Ok(new ApiResponse<string>(false, "Passwords do not match"));
-
-				await _userService.ChangePassword(UserId!, request.NewPassword);
-				return Ok(new ApiResponse<string>(true, "Password changed successfully"));
-			}
-			catch (Exception ex)
-			{
-				return Ok(new ApiResponse<string>(false, ex.Message));
-			}
+			await _userService.ChangePassword(UserId!, request.NewPassword);
+			return Ok(new ApiResponse<string>(true, "Password changed successfully"));
 		}
 
 		[HttpPut("profile")]
@@ -89,27 +64,20 @@ namespace Api.Controllers
 		public async Task<ActionResult<ApiResponse<string>>> UpdateProfile([FromBody] UpdateUserRequest request)
 		{
 			var user = await _userService.GetUserById(UserId!);
-
 			if (user == null)
 				return Ok(new ApiResponse<string>(false, "User not found"));
 
 			if (!string.IsNullOrWhiteSpace(request.FirstName))
 				user.FirstName = request.FirstName;
-
 			if (!string.IsNullOrWhiteSpace(request.LastName))
 				user.LastName = request.LastName;
-
 			if (!string.IsNullOrWhiteSpace(request.Username))
 				user.Username = request.Username;
-
 			if (!string.IsNullOrWhiteSpace(request.Email))
 				user.Email = request.Email;
 
 			var success = await _userService.UpdateUser(user);
-			if (!success)
-				return Ok(new ApiResponse<string>(false, "User not found"));
-
-			return Ok(new ApiResponse<string>(true, "Profile updated successfully"));
+			return Ok(new ApiResponse<string>(success, success ? "Profile updated successfully" : "Update failed"));
 		}
 
 		[HttpGet("me")]
@@ -119,9 +87,7 @@ namespace Api.Controllers
 			try
 			{
 				if (string.IsNullOrEmpty(UserId))
-				{
 					return Unauthorized(new ApiResponse<UserDto>(false, "Invalid token or user not authenticated"));
-				}
 
 				var user = await _userService.GetUserById(UserId);
 				var userDto = _mapper.Map<UserDto>(user);

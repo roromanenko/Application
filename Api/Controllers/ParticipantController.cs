@@ -1,6 +1,5 @@
 ﻿using Api.DTO;
 using AutoMapper;
-using Core.Domain;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +28,9 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> JoinEvent(string eventId)
 		{
+			if (string.IsNullOrWhiteSpace(eventId))
+				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+
 			try
 			{
 				await _participantService.SubscribeAsync(UserId!, eventId);
@@ -45,6 +47,9 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> LeaveEvent(string eventId)
 		{
+			if (string.IsNullOrWhiteSpace(eventId))
+				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+
 			try
 			{
 				var success = await _participantService.UnsubscribeAsync(UserId!, eventId);
@@ -61,15 +66,22 @@ namespace Api.Controllers
 		[AllowAnonymous]
 		public async Task<ActionResult<ApiResponse<IEnumerable<ParticipantDto>>>> GetEventFollowers(string eventId)
 		{
-			var participants = await _participantService.GetFollowersAsync(eventId);
+			if (string.IsNullOrWhiteSpace(eventId))
+				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "Event ID is required"));
 
-			return Ok(new ApiResponse<IEnumerable<Participant>>(true, "Participants retrieved", participants));
+			var participants = await _participantService.GetFollowersAsync(eventId);
+			var participantDtos = _mapper.Map<IEnumerable<ParticipantDto>>(participants);
+
+			return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(true, "Participants retrieved", participantDtos));
 		}
 
 		[HttpGet("{eventId}/is-following")]
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> IsFollowing(string eventId)
 		{
+			if (string.IsNullOrWhiteSpace(eventId))
+				return BadRequest(new ApiResponse<bool>(false, "Event ID is required"));
+
 			var isFollowing = await _participantService.IsFollowingAsync(UserId!, eventId);
 			return Ok(new ApiResponse<bool>(true, "Check complete", isFollowing));
 		}
@@ -78,14 +90,19 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<IEnumerable<ParticipantDto>>>> GetFollowing([FromQuery] string userId)
 		{
+			if (string.IsNullOrWhiteSpace(userId))
+				return BadRequest(new ApiResponse<IEnumerable<ParticipantDto>>(false, "User ID is required"));
+
 			try
 			{
 				var subscriptions = await _participantService.GetFollowingAsync(userId);
+				var subscriptionDtos = _mapper.Map<IEnumerable<ParticipantDto>>(subscriptions);
 
-				return Ok(new ApiResponse<IEnumerable<Participant>>(true, "Following events retrieved", subscriptions));
+				return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(true, "Following events retrieved", subscriptionDtos));
 			}
 			catch (Exception ex)
 			{
+				_logger.LogError(ex, "Error retrieving following events");
 				return Ok(new ApiResponse<IEnumerable<ParticipantDto>>(false, ex.Message));
 			}
 		}
