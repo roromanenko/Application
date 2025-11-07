@@ -1,0 +1,58 @@
+<section class="calendar-page">
+  <div class="calendar-container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>My Calendar</h1>
+        <p>View all your events and scheduled activities</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-refresh" (click)="refreshCalendar()" [disabled]="isLoading">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21.5 2V8M21.5 8H15.5M21.5 8L18.3 5.3C17.3 4.5 16.2 3.8 15 3.4C12.4 2.4 9.5 2.5 7 3.8C4.5 5.1 2.6 7.3 1.9 10C1.2 12.7 1.7 15.5 3.3 17.8C4.9 20.1 7.4 21.6 10.1 21.9C12.8 22.3 15.6 21.6 17.7 19.9C19.8 18.3 21.1 15.9 21.4 13.3M21.5 22V16M21.5 16H15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <svg class="spinner" width="48" height="48" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.25" />
+        <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+      </svg>
+      <p>Loading your calendar...</p>
+    </div>
+
+    <!-- Calendar Legend -->
+    <div *ngIf="!isLoading" class="calendar-legend">
+      <div class="legend-item">
+        <span class="legend-color organizer"></span>
+        <span class="legend-text">Events I Organize</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color participant"></span>
+        <span class="legend-text">Events I'm Attending</span>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div *ngIf="!isLoading" class="calendar-wrapper">
+      <full-calendar [options]="calendarOptions"></full-calendar>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && hasNoEvents" class="empty-state">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+        <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <h3>No Events Yet</h3>
+      <p>You don't have any events scheduled. Create or join an event to see it here!</p>
+      <a routerLink="/events" class="btn btn-primary">Browse Events</a>
+    </div>
+
+  </div>
+</section>
