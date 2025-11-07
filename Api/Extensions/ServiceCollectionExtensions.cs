@@ -23,14 +23,12 @@ namespace Api.Extensions
 			services.AddApplicationServices(configuration);
 			services.AddDbServices(configuration);
 			services.AddJwtAuthentication(configuration);
-
 			return services;
 		}
 
 		private static IServiceCollection AddHttpServices(this IServiceCollection services)
 		{
 			services.AddHttpClient();
-
 			return services;
 		}
 
@@ -41,6 +39,7 @@ namespace Api.Extensions
 			services.AddScoped<IJwtService, JwtService>();
 			services.AddScoped<PasswordHasher<UserEntity>>();
 			services.AddScoped<IEventService, EventService>();
+
 			services.AddAutoMapper(cfg =>
 			{
 				cfg.AddProfile<UserProfile>();
@@ -56,12 +55,17 @@ namespace Api.Extensions
 
 		private static IServiceCollection AddDbServices(this IServiceCollection services, IConfiguration configuration)
 		{
+			var connectionString = configuration.GetConnectionString("PostgreSql");
+
 			services.AddDbContext<ApplicationDbContext>(options =>
 			{
-				options.UseNpgsql(configuration.GetConnectionString("PostgreSql"));
+				options.UseNpgsql(connectionString);
 
-				options.EnableSensitiveDataLogging();
-				options.LogTo(Console.WriteLine);
+				if (configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Development")
+				{
+					options.EnableSensitiveDataLogging();
+					options.LogTo(Console.WriteLine);
+				}
 			});
 
 			services.AddScoped<IUserRepository, UserRepository>();
@@ -73,11 +77,23 @@ namespace Api.Extensions
 
 		private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
 		{
-			// Register JWT options
 			services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
-			var jwtOptions = configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 
-			// Set JWT auth
+			var jwtSection = configuration.GetSection("Jwt");
+			var jwtOptions = jwtSection.Get<JwtOptions>();
+
+			if (jwtOptions == null || string.IsNullOrEmpty(jwtOptions.SecretKey))
+			{
+				throw new InvalidOperationException(
+					"JWT configuration is missing or invalid. Please check appsettings.json");
+			}
+
+			if (jwtOptions.SecretKey.Length < 32)
+			{
+				throw new InvalidOperationException(
+					"JWT SecretKey must be at least 32 characters long for security reasons.");
+			}
+
 			services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -95,6 +111,22 @@ namespace Api.Extensions
 					ValidAudience = jwtOptions.Audience,
 					ValidateLifetime = true,
 					ClockSkew = TimeSpan.Zero,
+				};
+
+				options.Events = new JwtBearerEvents
+				{
+					OnMessageReceived = context =>
+					{
+						var accessToken = context.Request.Query["access_token"];
+						var path = context.HttpContext.Request.Path;
+
+						if (!string.IsNullOrEmpty(accessToken))
+						{
+							context.Token = accessToken;
+						}
+
+						return Task.CompletedTask;
+					}
 				};
 			});
 

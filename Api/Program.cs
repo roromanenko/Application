@@ -4,20 +4,22 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var allowedOrigins = builder.Environment.IsDevelopment()
+	? new[] { "http://localhost:50214", "http://localhost:4200" }
+	: new[] { builder.Configuration["FrontendUrl"] ?? "https://your-production-domain.com" };
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowFrontend",
 		policy =>
 		{
 			policy
-				.WithOrigins("http://localhost:50214")
+				.WithOrigins(allowedOrigins)
 				.AllowAnyHeader()
 				.AllowAnyMethod()
 				.AllowCredentials();
 		});
 });
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -30,7 +32,6 @@ builder.Services.AddSwaggerGen(c =>
 		Description = "Event Management System API"
 	});
 
-	// JWT support in Swagger
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
 		Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
@@ -62,24 +63,31 @@ builder.Services.AddSwaggerGen(c =>
 		Example = new OpenApiString("01:30:00")
 	});
 });
+
 builder.Services.AddOrganizaServices(builder.Configuration);
+builder.Services.AddOrganizaHealthChecks(builder.Configuration);
 
 var app = builder.Build();
 
+await app.UseDatabaseMigration();
+
 app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+	app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapOrganizaHealthChecks();
 
 app.Run();

@@ -4,6 +4,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>f7fdb154-1818-4ce2-81f5-dd30e63297c4</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,7 +17,7 @@
 		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />		<PackageReference Include="AspNetCore.HealthChecks.Npgsql" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
