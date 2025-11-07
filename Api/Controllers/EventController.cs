@@ -27,13 +27,20 @@ namespace Api.Controllers
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<EventDto>>> CreateEvent([FromBody] CreateEventRequest request)
 		{
-			var newEvent = _mapper.Map<Event>(request);
-			newEvent.OrganizerId = UserId!;
+			try
+			{
+				var newEvent = _mapper.Map<Event>(request);
+				newEvent.OrganizerId = UserId!;
+				var created = await _eventService.CreateEventAsync(newEvent);
+				var eventDto = _mapper.Map<EventDto>(created);
 
-			var created = await _eventService.CreateEventAsync(newEvent);
-			var eventDto = _mapper.Map<EventDto>(created);
-
-			return Ok(new ApiResponse<EventDto>(true, "Event created successfully", eventDto));
+				return Ok(new ApiResponse<EventDto>(true, "Event created successfully", eventDto));
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating event");
+				return StatusCode(500, new ApiResponse<EventDto>(false, "Error creating event"));
+			}
 		}
 
 		[HttpGet("{id}")]
@@ -68,26 +75,92 @@ namespace Api.Controllers
 				OrganizerId = organizerId
 			};
 
-			var isAuthorized = User?.Identity?.IsAuthenticated == true;
+			bool isAuthorized = User?.Identity?.IsAuthenticated == true;
+
 			var events = await _eventService.GetEventsAsync(options, includePrivate: isAuthorized);
 			var eventDtosList = _mapper.Map<IEnumerable<EventDto>>(events);
 
 			return Ok(new ApiResponse<IEnumerable<EventDto>>(true, "Events retrieved successfully", eventDtosList));
 		}
 
+		[HttpGet("mine")]
+		[Authorize]
+		public async Task<ActionResult<ApiResponse<IEnumerable<EventDto>>>> GetMyEvents()
+		{
+			var events = await _eventService.GetEventsByOrganizerAsync(UserId!);
+			var eventDtos = _mapper.Map<IEnumerable<EventDto>>(events);
+
+			return Ok(new ApiResponse<IEnumerable<EventDto>>(true, "Your events retrieved successfully", eventDtos));
+		}
+
+		[HttpGet("upcoming")]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<IEnumerable<EventDto>>>> GetUpcomingEvents(
+			[FromQuery] int daysAhead = 30,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 20)
+		{
+			var options = new EventQueryOptions
+			{
+				Page = page,
+				PageSize = pageSize,
+				SortBy = "startDate",
+				SortDescending = false
+			};
+
+			var allEvents = await _eventService.GetEventsAsync(options, includePrivate: false);
+			var upcoming = allEvents
+				.Where(e => e.StartDate >= DateTime.UtcNow && e.StartDate <= DateTime.UtcNow.AddDays(daysAhead))
+				.OrderBy(e => e.StartDate)
+				.ToList();
+
+			var eventDtos = _mapper.Map<IEnumerable<EventDto>>(upcoming);
+			return Ok(new ApiResponse<IEnumerable<EventDto>>(true, "Upcoming events retrieved successfully", eventDtos));
+		}
+
+		[HttpGet("popular")]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<IEnumerable<EventDto>>>> GetPopularEvents(
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 20)
+		{
+			var options = new EventQueryOptions
+			{
+				Page = page,
+				PageSize = pageSize,
+				SortBy = "participants",
+				SortDescending = true
+			};
+
+			var allEvents = await _eventService.GetEventsAsync(options, includePrivate: false);
+			var popular = allEvents
+				.ToList();
+
+			var eventDtos = _mapper.Map<IEnumerable<EventDto>>(popular);
+			return Ok(new ApiResponse<IEnumerable<EventDto>>(true, "Popular events retrieved successfully", eventDtos));
+		}
+
 		[HttpPut("{id}")]
 		[Authorize]
 		public async Task<ActionResult<ApiResponse<bool>>> UpdateEvent(string id, [FromBody] UpdateEventRequest request)
 		{
-			var updated = _mapper.Map<Event>(request);
-			updated.Id = id;
-			updated.OrganizerId = UserId!;
+			try
+			{
+				var updated = _mapper.Map<Event>(request);
+				updated.Id = id;
+				updated.OrganizerId = UserId!;
 
-			var success = await _eventService.UpdateEventAsync(updated);
-			if (!success)
-				return Ok(new ApiResponse<bool>(false, "Event not found or update failed"));
+				var success = await _eventService.UpdateEventAsync(updated);
+				if (!success)
+					return Ok(new ApiResponse<bool>(false, "Event not found or update failed"));
 
-			return Ok(new ApiResponse<bool>(true, "Event updated successfully", true));
+				return Ok(new ApiResponse<bool>(true, "Event updated successfully", true));
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating event");
+				return StatusCode(500, new ApiResponse<bool>(false, "Error updating event"));
+			}
 		}
 
 		[HttpDelete("{id}")]
@@ -95,7 +168,18 @@ namespace Api.Controllers
 		public async Task<ActionResult<ApiResponse<bool>>> DeleteEvent(string id)
 		{
 			var success = await _eventService.DeleteEventAsync(id);
-			return Ok(new ApiResponse<bool>(success, success ? "Event deleted successfully" : "Event not found", success));
+			if (!success)
+				return Ok(new ApiResponse<bool>(false, "Event not found or already deleted"));
+
+			return Ok(new ApiResponse<bool>(true, "Event deleted successfully", true));
+		}
+
+		[HttpGet("{id}/participants/count")]
+		[AllowAnonymous]
+		public async Task<ActionResult<ApiResponse<int>>> GetParticipantCount(string id)
+		{
+			var count = await _eventService.GetParticipantCountAsync(id);
+			return Ok(new ApiResponse<int>(true, "Count retrieved", count));
 		}
 	}
 }

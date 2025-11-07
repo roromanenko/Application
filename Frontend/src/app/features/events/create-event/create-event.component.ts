@@ -40,21 +40,24 @@ export class CreateEventComponent {
   }
 
   onStartDateChange() {
+    const start = new Date(this.startDate);
     this.minEndDate = this.startDate;
 
-    if (this.endDate <= this.startDate) {
-      const startDateTime = new Date(this.startDate);
-      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-      this.endDate = endDateTime.toISOString().slice(0, 16);
+    const end = new Date(this.endDate);
+    if (end <= start) {
+      const newEnd = new Date(start.getTime() + 60 * 180 * 1000);
+      this.endDate = newEnd.toISOString().slice(0, 16);
     }
   }
 
   onEndDateChange() {
-    if (this.endDate <= this.startDate) {
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+
+    if (end <= start) {
       this.notification.warning('End date must be after start date');
-      const startDateTime = new Date(this.startDate);
-      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
-      this.endDate = endDateTime.toISOString().slice(0, 16);
+      const correctedEnd = new Date(start.getTime() + 60 * 180 * 1000);
+      this.endDate = correctedEnd.toISOString().slice(0, 16);
     }
   }
 
@@ -111,18 +114,20 @@ export class CreateEventComponent {
       this.notification.error('Title must be at least 3 characters');
       return false;
     }
-    if (!this.startDate) {
-      this.notification.error('Start date is required');
+
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+
+    if (end <= start) {
+      this.notification.error('End date must be after start date');
       return false;
     }
-    if (!this.endDate) {
-      this.notification.error('End date is required');
-      return false;
-    }
+
     if (this.capacity !== null && this.capacity < 0) {
       this.notification.error('Capacity cannot be negative');
       return false;
     }
+
     return true;
   }
 

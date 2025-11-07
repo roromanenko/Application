@@ -75,7 +75,7 @@ export class EditEventComponent implements OnInit {
     this.minEndDate = this.startDate;
     if (this.endDate <= this.startDate) {
       const startDateTime = new Date(this.startDate);
-      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+      const endDateTime = new Date(startDateTime.getTime() + 60 * 180 * 1000);
       this.endDate = endDateTime.toISOString().slice(0, 16);
     }
   }
@@ -84,7 +84,7 @@ export class EditEventComponent implements OnInit {
     if (this.endDate <= this.startDate) {
       this.notification.warning('End date must be after start date');
       const startDateTime = new Date(this.startDate);
-      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+      const endDateTime = new Date(startDateTime.getTime() + 60 * 180 * 1000);
       this.endDate = endDateTime.toISOString().slice(0, 16);
     }
   }
