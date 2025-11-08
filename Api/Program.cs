@@ -10,7 +10,7 @@ var allowedOrigins = builder.Environment.IsDevelopment()
 	: new[]
 	{
 		builder.Configuration["FrontendUrl"] ?? "https://organiza-frontend.onrender.com",
-		"https://organiza-frontend.onrender.com"
+		"https://organiza-backend-3427.onrender.com",
     };
 
 builder.Services.AddCors(options =>

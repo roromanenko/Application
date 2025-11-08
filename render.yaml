@@ -16,13 +16,13 @@ services:
       - key: ConnectionStrings__PostgreSql
         sync: false
       - key: Jwt__SecretKey
-        generateValue: true
+        sync: false
       - key: Jwt__Issuer
-        value: https://organiza-backend.onrender.com
+        value: https://organiza-backend-3427.onrender.com
       - key: Jwt__Audience
-        value: https://organiza-backend.onrender.com
+        value: https://organiza-backend-3427.onrender.com
       - key: FrontendUrl
-        value: https://organiza-frontend.onrender.com
+        value: https://YOUR-FRONTEND-URL.onrender.com
     healthCheckPath: /health
 
   # Frontend Service
@@ -36,4 +36,4 @@ services:
     branch: master
     envVars:
       - key: API_URL
-        value: https://organiza-backend.onrender.com
+        value: https://organiza-backend-3427.onrender.com
