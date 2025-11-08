@@ -2,9 +2,7 @@
   "/api": {
     "target": "http://backend:5000",
     "secure": false,
-    "changeOrigin": true,
-    "pathRewrite": {
-      "^/api": ""
+    "changeOrigin": true
     },
     "logLevel": "debug"
   }

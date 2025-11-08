@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Client, EventDto } from '../../core/api/generated-api';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -30,7 +30,7 @@ interface CalendarEvent {
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule],
+  imports: [CommonModule, FullCalendarModule, RouterLink],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
@@ -75,8 +75,8 @@ export class CalendarComponent implements OnInit {
       },
       timeGridWeek: {
         titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
-        slotMinTime: '06:00:00',
-        slotMaxTime: '22:00:00',
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00',
         slotDuration: '01:00:00',
         slotLabelInterval: '01:00:00',
         slotLabelFormat: {

@@ -20,7 +20,7 @@ export class EventDetailComponent implements OnInit {
   isLoading = true;
   isLoadingAction = false;
   isLoggedIn = false;
-  currentUserId: string | null = null;
+  currentUserId: string | undefined = undefined;
   isParticipant = false;
 
   constructor(
@@ -45,19 +45,8 @@ export class EventDetailComponent implements OnInit {
 
   loadCurrentUser()
   {
-    const userString = (localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY));
-    if (userString)
-    {
-      try
-      {
-        const user = JSON.parse(userString);
-        this.currentUserId = user.id || user.userId;
-      }
-      catch (e)
-      {
-        console.error('Error parsing user data:', e);
-      }
-    }
+    const user = this.authService.getCurrentUser()!;
+	this.currentUserId = user.id;
   }
 
   loadEvent(id: string) {
@@ -161,6 +150,7 @@ export class EventDetailComponent implements OnInit {
           this.notification.success('Successfully joined the event!');
           this.isParticipant = true;
           this.participantCount++;
+		  this.participants.push(this.authService.getCurrentUser()!);
         } else {
           this.notification.error(response.message || 'Failed to join event');
         }
@@ -196,6 +186,7 @@ export class EventDetailComponent implements OnInit {
           this.notification.success('Successfully left the event');
           this.isParticipant = false;
           this.participantCount--;
+		  this.participants = this.participants.filter(p => p.id !== this.currentUserId);
         } else {
           this.notification.error(response.message || 'Failed to leave event');
         }
@@ -218,7 +209,8 @@ export class EventDetailComponent implements OnInit {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false
     });
   }
 

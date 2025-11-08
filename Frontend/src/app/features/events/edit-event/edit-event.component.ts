@@ -51,8 +51,11 @@ export class EditEventComponent implements OnInit {
           const event = res.data as EventDto;
           this.title = event.title ?? '';
           this.description = event.description ?? '';
-          this.startDate = new Date(event.startDate!).toISOString().slice(0, 16);
-          this.endDate = new Date(event.endDate!).toISOString().slice(0, 16);
+		  const startDateTime = new Date(event.startDate!);
+		  const offset = startDateTime.getTimezoneOffset() * 60000;
+          this.startDate = new Date(startDateTime.getTime() - offset).toISOString().slice(0, 16);
+		  const endDateTime = new Date(event.endDate!);
+          this.endDate = new Date(endDateTime.getTime() - offset).toISOString().slice(0, 16);
           this.location = event.location ?? '';
           this.capacity = event.capacity ?? null;
           this.isPublic = event.isPublic ?? true;

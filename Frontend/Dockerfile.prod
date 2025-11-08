@@ -7,12 +7,10 @@ RUN npm ci
 
 COPY . .
 
-ARG API_URL=https://organiza-backend-3427.onrender.com/api
-RUN echo "export const environment = { production: true, apiBaseUrl: '$API_URL' };" > src/app/environments/environment.prod.ts
+RUN echo "=== Development environment ===" && cat src/app/environments/environment.ts
+RUN echo "=== Production environment ===" && cat src/app/environments/environment.prod.ts
 
-RUN cat src/app/environments/environment.prod.ts
-
-RUN npm run build -- --configuration production
+RUN npm run build -- --configuration=production
 
 RUN echo "=== Build output ===" && ls -la dist/Frontend/browser/
 

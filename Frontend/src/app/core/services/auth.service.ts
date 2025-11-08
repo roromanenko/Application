@@ -28,4 +28,16 @@ export class AuthService {
   hasToken(): boolean {
     return !!(localStorage.getItem(constants.TOKEN_KEY) || sessionStorage.getItem(constants.TOKEN_KEY));
   }
+
+  getCurrentUser(): UserDto | null {
+	const userString = (localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY));
+	if (userString) {
+	  try {
+		return JSON.parse(userString);
+	  } catch (e) {
+		console.error('Error parsing user data:', e);
+	  }
+	}
+	return null;
+  }
 }

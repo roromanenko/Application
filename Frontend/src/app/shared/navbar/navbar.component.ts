@@ -43,11 +43,7 @@ export class NavbarComponent implements OnInit {
 
   loadUserProfile()
   {
-    const userString = (localStorage.getItem(constants.USER_KEY) || sessionStorage.getItem(constants.USER_KEY))
-    if (userString)
-    {
-      this.user = JSON.parse(userString);
-    }
+    this.user = this.authService.getCurrentUser();
   }
 
   getInitials(): string
