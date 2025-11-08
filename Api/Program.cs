@@ -7,7 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 var allowedOrigins = builder.Environment.IsDevelopment()
 	? new[] { "http://localhost:50214", "http://localhost:4200" }
-	: new[] { builder.Configuration["FrontendUrl"] ?? "https://your-production-domain.com" };
+	: new[]
+	{
+		builder.Configuration["FrontendUrl"] ?? "https://organiza-frontend.onrender.com",
+		"https://organiza-frontend.onrender.com"
+    };
 
 builder.Services.AddCors(options =>
 {
@@ -74,7 +78,7 @@ await app.UseDatabaseMigration();
 
 app.UseCors("AllowFrontend");
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();

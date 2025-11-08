@@ -1,0 +1,39 @@
+services:
+  # Backend API Service
+  - type: web
+    name: organiza-backend
+    env: docker
+    dockerfilePath: ./Api/Dockerfile.prod
+    dockerContext: .
+    region: frankfurt
+    plan: free
+    branch: master
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:5000
+      - key: ConnectionStrings__PostgreSql
+        sync: false
+      - key: Jwt__SecretKey
+        generateValue: true
+      - key: Jwt__Issuer
+        value: https://organiza-backend.onrender.com
+      - key: Jwt__Audience
+        value: https://organiza-backend.onrender.com
+      - key: FrontendUrl
+        value: https://organiza-frontend.onrender.com
+    healthCheckPath: /health
+
+  # Frontend Service
+  - type: web
+    name: organiza-frontend
+    env: docker
+    dockerfilePath: ./Frontend/Dockerfile.prod
+    dockerContext: ./Frontend
+    region: frankfurt
+    plan: free
+    branch: master
+    envVars:
+      - key: API_URL
+        value: https://organiza-backend.onrender.com
