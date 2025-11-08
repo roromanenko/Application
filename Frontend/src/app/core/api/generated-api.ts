@@ -30,7 +30,7 @@ export class Client {
      * @return OK
      */
     eventPOST(body?: CreateEventRequest | undefined): Observable<EventDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/Event";
+        let url_ = this.baseUrl + "/Event";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -91,7 +91,7 @@ export class Client {
      * @return OK
      */
     eventGET(page?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDescending?: boolean | undefined, title?: string | undefined, organizerId?: string | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Event?";
+        let url_ = this.baseUrl + "/Event?";
         if (page === null)
             throw new globalThis.Error("The parameter 'page' cannot be null.");
         else if (page !== undefined)
@@ -166,7 +166,7 @@ export class Client {
      * @return OK
      */
     eventGET2(id: string): Observable<EventDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}";
+        let url_ = this.baseUrl + "/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -221,7 +221,7 @@ export class Client {
      * @return OK
      */
     eventPUT(id: string, body?: UpdateEventRequest | undefined): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}";
+        let url_ = this.baseUrl + "/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -279,7 +279,7 @@ export class Client {
      * @return OK
      */
     eventDELETE(id: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}";
+        let url_ = this.baseUrl + "/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -333,7 +333,7 @@ export class Client {
      * @return OK
      */
     mine(): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/mine";
+        let url_ = this.baseUrl + "/Event/mine";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -387,7 +387,7 @@ export class Client {
      * @return OK
      */
     upcoming(daysAhead?: number | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/upcoming?";
+        let url_ = this.baseUrl + "/Event/upcoming?";
         if (daysAhead === null)
             throw new globalThis.Error("The parameter 'daysAhead' cannot be null.");
         else if (daysAhead !== undefined)
@@ -452,7 +452,7 @@ export class Client {
      * @return OK
      */
     popular(page?: number | undefined, pageSize?: number | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/popular?";
+        let url_ = this.baseUrl + "/Event/popular?";
         if (page === null)
             throw new globalThis.Error("The parameter 'page' cannot be null.");
         else if (page !== undefined)
@@ -511,7 +511,7 @@ export class Client {
      * @return OK
      */
     count(id: string): Observable<Int32ApiResponse> {
-        let url_ = this.baseUrl + "/api/Event/{id}/participants/count";
+        let url_ = this.baseUrl + "/Event/{id}/participants/count";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -565,7 +565,7 @@ export class Client {
      * @return OK
      */
     join(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Participant/{eventId}/join";
+        let url_ = this.baseUrl + "/Participant/{eventId}/join";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -619,7 +619,7 @@ export class Client {
      * @return OK
      */
     leave(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Participant/{eventId}/leave";
+        let url_ = this.baseUrl + "/Participant/{eventId}/leave";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -673,7 +673,7 @@ export class Client {
      * @return OK
      */
     followers(eventId: string): Observable<ParticipantDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Participant/{eventId}/followers";
+        let url_ = this.baseUrl + "/Participant/{eventId}/followers";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -727,7 +727,7 @@ export class Client {
      * @return OK
      */
     isFollowing(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/api/Participant/{eventId}/is-following";
+        let url_ = this.baseUrl + "/Participant/{eventId}/is-following";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -782,7 +782,7 @@ export class Client {
      * @return OK
      */
     following(userId?: string | undefined): Observable<ParticipantDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/api/Participant/following?";
+        let url_ = this.baseUrl + "/Participant/following?";
         if (userId === null)
             throw new globalThis.Error("The parameter 'userId' cannot be null.");
         else if (userId !== undefined)
@@ -838,7 +838,7 @@ export class Client {
      * @return OK
      */
     register(body?: RegisterRequest | undefined): Observable<UserDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/User/register";
+        let url_ = this.baseUrl + "/User/register";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -894,7 +894,7 @@ export class Client {
      * @return OK
      */
     login(body?: LoginRequest | undefined): Observable<LoginResponseApiResponse> {
-        let url_ = this.baseUrl + "/api/User/login";
+        let url_ = this.baseUrl + "/User/login";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -950,7 +950,7 @@ export class Client {
      * @return OK
      */
     password(body?: ChangePasswordRequest | undefined): Observable<StringApiResponse> {
-        let url_ = this.baseUrl + "/api/User/password";
+        let url_ = this.baseUrl + "/User/password";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1006,7 +1006,7 @@ export class Client {
      * @return OK
      */
     profile(body?: UpdateUserRequest | undefined): Observable<StringApiResponse> {
-        let url_ = this.baseUrl + "/api/User/profile";
+        let url_ = this.baseUrl + "/User/profile";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1061,7 +1061,7 @@ export class Client {
      * @return OK
      */
     me(): Observable<UserDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/User/me";
+        let url_ = this.baseUrl + "/User/me";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
