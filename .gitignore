@@ -1,139 +1,165 @@
-# === OS and General ===
-.DS_Store
-Thumbs.db
+# =====================================
+# .NET / Visual Studio
+# =====================================
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
-# === Visual Studio / MSBuild ===
+## Visual Studio
+.vs/
+.vscode/
+*.rsuser
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
-.vs/
-_ReSharper*/
-*.DotSettings.user
-.idea/
-*.ipr
-*.iws
+*.userprefs
 
-# VS Code
-.vscode/
-
-# NCrunch / CodeRush / StyleCop / Sonar
-.ncrunchsolution
-.nCrunchTemp_*
-*.ncrunchproject
-.cr/
-StyleCop.Cache
-.sonar/
-.sonarqube/
-.scannerwork/
-
-# === .NET build output ===
-bin/
-obj/
-[Bb]uild/
-[Ll]og/
-*.log
-
-artifacts/
-publish/
-**/PublishOutput/
-**/out/
-
-TestResults/
-*.trx
-*.coverage
-*.coveragexml
-.coverage
-.coveragexml
-
-# === NuGet ===
-packages/
-*.nupkg
-*.snupkg
-# NuGet.exe
-.nuget/NuGet.exe
-
-# === ASP.NET Core ===
-appsettings.*.local.json
-appsettings.local.json
-*.Secrets.json
-
-# Launch profiles
-*.pubxml.user
-*.pubxml~*
-Properties/ServiceDependencies/
-Properties/ServiceDependencies.local.json
-**/launchSettings.json.user
-
-# === Entity Framework ===
-**/Migrations/*.Designer.cs.user
-**/Migrations/*_Backup*/
-
-# === Frontend в составе ASP.NET Core (SPA/LibMan) ===
-node_modules/
-bower_components/
-wwwroot/lib/
-libman.cache.json
-
-# === Docker ===
-**/obj/Docker/
-**/obj/**/Docker/*.*
-docker-compose.*.override.yml.local
-
-# === Rider DotCover / JetBrains ===
-.idea/.idea.*
-.idea/.fleet/
-**/.idea/.gitignore
-**/.idea/**/workspace.xml
-**/.idea/**/tasks.xml
-**/.idea/**/dictionaries
-**/.idea/**/shelf/
-
-# === dotnet ===
-.tools/
-.dotnet/
-.ionide/
-
-# === Additional ===
+## User-specific files
+*.suo
+*.user
+*.sln.docstates
+*.userprefs
+*_i.c
+*_p.c
+*_i.h
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
 *.tmp
-*.temp
-*.bak
-*.orig
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# =====================================
+# Sensitive Configuration Files
+# =====================================
+**/appsettings.Production.json
+.env
+.env.local
+.env.production
+.env.*.local
+
+# User secrets
+**/secrets.json
+
+# =====================================
+# Node / Angular / Frontend
+# =====================================
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+**/.pnpm-debug.log*
+
+## Angular build output
+**/dist/
+**/tmp/
+**/out-tsc/
+**/.angular/
+**/bazel-out/
+
+## Frontend IDE
+**/.idea/
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
+
+# =====================================
+# Docker
+# =====================================
+## Docker volumes
+postgres_data/
+**/docker-compose.override.local.yml
+
+## Don't ignore these Docker files (we want them in repo)
+!docker-compose.yml
+!docker-compose.override.yml
+!docker-compose.prod.yml
+!**/Dockerfile
+!**/Dockerfile.prod
+!**/.dockerignore
+
+# =====================================
+# Database
+# =====================================
+*.db
+*.sqlite
+*.sqlite3
+**/Database/backups/*.sql
+**/Database/backups/*.dump
+
+# =====================================
+# Operating System
+# =====================================
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+## Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+## Linux
+*~
+.directory
+.Trash-*
+
+# =====================================
+# Logs
+# =====================================
+**/logs/
+*.log
+**/Api/logs/
+
+# =====================================
+# Testing
+# =====================================
+**/coverage/
+**/.nyc_output/
+**/TestResults/
+
+# =====================================
+# Temporary files
+# =====================================
 *.swp
 *.swo
-*.~*
-
-# === CI ===
-*.tgz
-*.zip
-*.tar
-
-# === Angular ===
-# Angular CLI build output
-dist/
-dist-ssr/
-.angular/
-.angular/cache/
-
-# Dependencies
-Frontend/node_modules/
-
-# Environment files (если есть приватные ключи)
-Frontend/src/environments/environment*.ts
-
-# Temporary build/test files
-Frontend/.angular/
-Frontend/.angular/cache/
-Frontend/.scannerwork/
-Frontend/coverage/
-Frontend/.firebase/
-Frontend/.npm/
-Frontend/npm-debug.log*
-Frontend/yarn-error.log*
-Frontend/package-lock.json
-Frontend/.DS_Store
-
-# IDE/Editor
-Frontend/.idea/
-Frontend/.vscode/
-Frontend/.fleet/
+*~
+.tmp

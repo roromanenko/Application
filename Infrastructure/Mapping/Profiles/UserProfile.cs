@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using Infrastructure.Persistence.Entity;
 using Core.Domain;
-using MongoDB.Bson;
+using Infrastructure.Persistence.Entity;
 
 namespace Infrastructure.Mapping.Profiles
 {
@@ -10,28 +9,23 @@ namespace Infrastructure.Mapping.Profiles
 		public UserProfile()
 		{
 			CreateMap<User, UserEntity>()
-				.ConstructUsing(u => new UserEntity
-				{
-					Id = ObjectId.Parse(u.Id),
-					Username = u.Username,
-					Email = u.Email,
-					FirstName = u.FirstName,
-					LastName = u.LastName,
-					PasswordHash = u.PasswordHash,
-					Roles = u.Roles.ToList()
-				});
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src =>
+					string.IsNullOrEmpty(src.Id) ? Guid.NewGuid() : Guid.Parse(src.Id)))
+				.ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+				.ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+				.ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+				.ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+				.ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => src.PasswordHash))
+				.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles));
 
 			CreateMap<UserEntity, User>()
-			.ConstructUsing(e => new User
-			{
-				Id = e.Id.ToString(),
-				Username = e.Username,
-				Email = e.Email,
-				FirstName = e.FirstName,
-				LastName = e.LastName,
-				PasswordHash = e.PasswordHash,
-				Roles = e.Roles.ToList()
-			});
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
+				.ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+				.ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+				.ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+				.ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+				.ForMember(dest => dest.PasswordHash, opt => opt.MapFrom(src => src.PasswordHash))
+				.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles));
 		}
 	}
 }

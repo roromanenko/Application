@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/RicoSuter/NSwag/master/src/NSwag.Commands/NSwag.Commands.Schema.json",
+  "runtime": "Net80",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "https://localhost:7032/swagger/v1/swagger.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "className": "{controller}Client",
+      "template": "Angular",
+      "promiseType": "Promise",
+      "generateClientClasses": true,
+      "generateOptionalParameters": true,
+      "generateDtoTypes": true,
+      "serviceHost": "None",
+      "rxJsVersion": 7,
+      "output": "src/app/core/api/generated-api.ts"
+    }
+  }
+}

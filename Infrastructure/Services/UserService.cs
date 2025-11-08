@@ -4,7 +4,6 @@ using Core.Interfaces;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
 using Microsoft.AspNetCore.Identity;
-using MongoDB.Bson;
 
 namespace Infrastructure.Services
 {
@@ -54,31 +53,49 @@ namespace Infrastructure.Services
 				LastName = lastName,
 				Roles = ["user"]
 			};
-			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 
+			newUser.PasswordHash = _passwordHasher.HashPassword(newUser, password);
 			newUser = await _userRepository.CreateUser(newUser);
+
 			return _mapper.Map<User>(newUser);
 		}
 
 		public async Task<User> GetUserById(string userId)
 		{
-			UserEntity userEntity = await _userRepository.GetUserById(ObjectId.Parse(userId));
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
 
+			UserEntity? userEntity = await _userRepository.GetUserById(userGuid);
 			return userEntity is null
 				? throw new KeyNotFoundException($"User with ID '{userId}' was not found.")
 				: _mapper.Map<User>(userEntity);
 		}
 
-		public async Task UpdateUser(User user)
+		public async Task<bool> UpdateUser(User user)
 		{
-			await _userRepository.UpdateUser(_mapper.Map<UserEntity>(user));
+			var existingUser = await _userRepository.GetUserById(Guid.Parse(user.Id));
+			if (existingUser == null)
+				return false;
+
+			existingUser.FirstName = user.FirstName;
+			existingUser.LastName = user.LastName;
+			existingUser.Email = user.Email;
+			existingUser.Username = user.Username;
+
+			await _userRepository.UpdateUser(existingUser);
+			return true;
 		}
 
 		public async Task ChangePassword(string userId, string newPassword)
 		{
-			var user = await _userRepository.GetUserById(ObjectId.Parse(userId)) ?? throw new ArgumentException("User not found");
+			if (!Guid.TryParse(userId, out var userGuid))
+				throw new ArgumentException("Invalid user ID format");
+
+			var user = await _userRepository.GetUserById(userGuid)
+				?? throw new ArgumentException("User not found");
+
 			var hashedPassword = _passwordHasher.HashPassword(user, newPassword);
-			await _userRepository.ChangePassword(ObjectId.Parse(userId), hashedPassword);
+			await _userRepository.ChangePassword(userGuid, hashedPassword);
 		}
 	}
 }

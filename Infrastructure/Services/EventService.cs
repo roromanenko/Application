@@ -4,23 +4,19 @@ using Core.Interfaces;
 using Core.Options;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Services
 {
 	public class EventService : IEventService
 	{
 		private readonly IEventRepository _eventRepository;
+		private readonly IParticipantService _participantService;
 		private readonly IMapper _mapper;
 
-		public EventService(IEventRepository eventRepository, IMapper mapper)
+		public EventService(IEventRepository eventRepository, IParticipantService participantService, IMapper mapper)
 		{
 			_eventRepository = eventRepository;
+			_participantService = participantService;
 			_mapper = mapper;
 		}
 
@@ -31,12 +27,42 @@ namespace Infrastructure.Services
 			return _mapper.Map<Event>(created);
 		}
 
-		public async Task<Event?> GetEventByIdAsync(string eventId)
+		public async Task<bool> JoinEventAsync(string eventId, string userId)
 		{
-			if (!ObjectId.TryParse(eventId, out var objectId))
+			if (!Guid.TryParse(eventId, out var eventGuid))
 				throw new ArgumentException("Invalid event ID format");
 
-			var entity = await _eventRepository.GetEventById(objectId);
+			var ev = await _eventRepository.GetEventById(eventGuid);
+			if (ev == null)
+				throw new ArgumentException("Event not found");
+
+			var participants = await _participantService.GetFollowersAsync(eventId);
+			if (ev.Capacity > 0 && participants.Count() >= ev.Capacity)
+				throw new InvalidOperationException("Event is already full");
+
+			if (participants.Any(p => p.UserId == userId))
+				throw new InvalidOperationException("Already joined this event");
+
+			await _participantService.SubscribeAsync(userId, eventId);
+			return true;
+		}
+
+		public async Task<bool> LeaveEventAsync(string eventId, string userId)
+		{
+			var existing = await _participantService.IsFollowingAsync(userId, eventId);
+			if (!existing)
+				return false;
+
+			await _participantService.UnsubscribeAsync(userId, eventId);
+			return true;
+		}
+
+		public async Task<Event?> GetEventByIdAsync(string eventId)
+		{
+			if (!Guid.TryParse(eventId, out var guid))
+				throw new ArgumentException("Invalid event ID format");
+
+			var entity = await _eventRepository.GetEventById(guid);
 			return entity is null ? null : _mapper.Map<Event>(entity);
 		}
 
@@ -48,18 +74,26 @@ namespace Infrastructure.Services
 
 		public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(string organizerId)
 		{
-			var entities = await _eventRepository.GetEventsByOrganizer(organizerId);
+			if (!Guid.TryParse(organizerId, out var organizerGuid))
+				throw new ArgumentException("Invalid organizer ID format");
+
+			var entities = await _eventRepository.GetEventsByOrganizer(organizerGuid);
 			return _mapper.Map<IEnumerable<Event>>(entities);
 		}
 
 		public async Task<IEnumerable<Event>> GetEventsAsync(EventQueryOptions options, bool includePrivate = false)
 		{
 			var entities = await _eventRepository.GetEvents(options);
-
 			if (!includePrivate)
 				entities = entities.Where(e => e.IsPublic);
 
 			return _mapper.Map<IEnumerable<Event>>(entities);
+		}
+
+		public async Task<int> GetParticipantCountAsync(string eventId)
+		{
+			var followers = await _participantService.GetFollowersAsync(eventId);
+			return followers.Count();
 		}
 
 		public async Task<bool> UpdateEventAsync(Event updatedEvent)
@@ -70,10 +104,10 @@ namespace Infrastructure.Services
 
 		public async Task<bool> DeleteEventAsync(string eventId)
 		{
-			if (!ObjectId.TryParse(eventId, out var objectId))
+			if (!Guid.TryParse(eventId, out var guid))
 				throw new ArgumentException("Invalid event ID format");
 
-			return await _eventRepository.DeleteEvent(objectId);
+			return await _eventRepository.DeleteEvent(guid);
 		}
 	}
 }

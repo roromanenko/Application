@@ -1,0 +1,32 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+COPY ["Api/Api.csproj", "Api/"]
+COPY ["Core/Core.csproj", "Core/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+
+RUN dotnet restore "Api/Api.csproj"
+
+COPY ["Api/", "Api/"]
+COPY ["Core/", "Core/"]
+COPY ["Infrastructure/", "Infrastructure/"]
+
+WORKDIR "/src/Api"
+RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+COPY --from=build /app/publish .
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:5000
+
+EXPOSE 5000
+
+ENTRYPOINT ["dotnet", "Api.dll"]

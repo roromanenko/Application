@@ -1,0 +1,17 @@
+services:
+  backend:
+    environment:
+      - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=false
+      - Jwt__Issuer=http://localhost:5000
+      - Jwt__Audience=http://localhost:5000
+    volumes:
+      - ./Api/logs:/app/logs
+
+  frontend:
+    environment:
+      - NG_CLI_ANALYTICS=false
+    command: npm start -- --host 0.0.0.0 --port 4200 --allowed-hosts=all --poll=2000
+
+  postgres:
+    volumes:
+      - ./Database/backups:/backups

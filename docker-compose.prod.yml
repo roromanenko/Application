@@ -1,0 +1,61 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile.prod
+    container_name: organiza_backend_prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__PostgreSql=${PROD_CONNECTION_STRING}
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - FrontendUrl=${FRONTEND_URL}
+    ports:
+      - "5000:5000"
+    networks:
+      - organiza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - API_URL=${API_URL}
+    container_name: organiza_frontend_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - organiza-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  organiza-network:
+    driver: bridge

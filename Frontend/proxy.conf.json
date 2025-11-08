@@ -1,7 +1,11 @@
 {
   "/api": {
-    "target": "https://localhost:7032",
+    "target": "http://backend:5000",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    },
+    "logLevel": "debug"
   }
 }

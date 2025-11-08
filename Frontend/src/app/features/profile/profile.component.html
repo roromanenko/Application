@@ -1,0 +1,173 @@
+<section class="profile-page">
+  <div class="profile-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <svg class="spinner" width="48" height="48" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.25" />
+        <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+      </svg>
+      <p>Loading profile...</p>
+    </div>
+
+    <!-- Profile Header -->
+    <div *ngIf="!isLoading && user" class="profile-header">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          {{ user?.firstName?.charAt(0) }}{{ user?.lastName?.charAt(0) }}
+        </div>
+      </div>
+
+      <div class="profile-info">
+        <h1>{{ user?.firstName }} {{ user?.lastName }}</h1>
+        <p class="username">@{{ user?.username }}</p>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn btn-edit" routerLink="/profile/edit">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M18.5 2.5C18.8978 2.1022 19.4374 1.8787 20 1.8787C20.5626 1.8787 21.1022 2.1022 21.5 2.5C21.8978 2.8978 22.1213 3.4374 22.1213 4C22.1213 4.5626 21.8978 5.1022 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Edit Profile
+        </button>
+        <button class="btn btn-logout" (click)="logout()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M9 21H5C4.4696 21 3.9609 20.7893 3.5858 20.4142C3.2107 20.0391 3 19.5304 3 19V5C3 4.4696 3.2107 3.9609 3.5858 3.5858C3.9609 3.2107 4.4696 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div *ngIf="!isLoading && user" class="tabs-container">
+      <div class="tabs">
+        <button class="tab" [class.active]="activeTab === 'subscribed'" (click)="switchTab('subscribed')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M19 21L12 16L5 21V5C5 4.47 5.21 3.96 5.59 3.59C5.96 3.21 6.47 3 7 3H17C17.53 3 18.04 3.21 18.41 3.59C18.79 3.96 19 4.47 19 5V21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Subscribed Events
+          <span class="count">{{ subscribedEvents.length }}</span>
+        </button>
+
+        <button class="tab" [class.active]="activeTab === 'my-events'" (click)="switchTab('my-events')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.8954 20.1046 5 19 5H5C3.8954 5 3 5.8954 3 7V19C3 20.1046 3.8954 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          My Events
+          <span class="count">{{ myEvents.length }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Events Content -->
+    <div *ngIf="!isLoading && user" class="events-content">
+
+      <!-- Loading Events -->
+      <div *ngIf="isLoadingEvents" class="loading-events">
+        <svg class="spinner-small" width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.25" />
+          <path d="M12 2C6.47715 2 2 6.47715 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+        </svg>
+        <p>Loading events...</p>
+      </div>
+
+      <!-- Subscribed Events Tab -->
+      <div *ngIf="!isLoadingEvents && activeTab === 'subscribed'" class="events-grid">
+        <div *ngIf="subscribedEvents.length === 0" class="empty-state">
+          <h3>No Subscribed Events</h3>
+          <p>You haven't subscribed to any events yet.</p>
+          <a routerLink="/events" class="btn btn-primary">Browse Events</a>
+        </div>
+
+        <div *ngFor="let event of subscribedEvents" class="event-card">
+          <div class="event-status" [class]="getEventStatus(event)">
+            {{ getEventStatus(event) }}
+          </div>
+
+          <h3 class="event-title">
+            <a [routerLink]="['/events', event.id]">{{ event.title }}</a>
+          </h3>
+
+          <p class="event-description" *ngIf="event.description">
+            {{ event.description.length > 120 ? (event.description.substring(0, 120) + '...') : event.description }}
+          </p>
+
+          <div class="event-meta">
+            <div class="meta-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {{ formatDate(event.startDate) }}
+            </div>
+
+            <div class="meta-item" *ngIf="event.location">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {{ event.location }}
+            </div>
+
+            <div class="meta-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16 3.12988C17.7252 3.57393 19 5.13999 19 7.00098C19 8.86196 17.7252 10.428 16 10.872" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {{ getParticipantCount(event.id ?? '') }}{{ (event.capacity ?? 0) > 0 ? '/' + event.capacity : '' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Events Tab -->
+      <div *ngIf="!isLoadingEvents && activeTab === 'my-events'" class="events-grid">
+        <div *ngIf="myEvents.length === 0" class="empty-state">
+          <h3>No Events Yet</h3>
+          <p>You haven't created any events yet.</p>
+          <a routerLink="/events/create" class="btn btn-primary">Create Event</a>
+        </div>
+
+        <div *ngFor="let event of myEvents" class="event-card">
+          <div class="event-status" [class]="getEventStatus(event)">
+            {{ getEventStatus(event) }}
+          </div>
+
+          <div class="event-badge">Organizer</div>
+
+          <h3 class="event-title">
+            <a [routerLink]="['/events', event.id]">{{ event.title }}</a>
+          </h3>
+
+          <p class="event-description" *ngIf="event.description">
+            {{ event.description.length > 120 ? (event.description.substring(0, 120) + '...') : event.description }}
+          </p>
+
+          <div class="event-meta">
+            <div class="meta-item">
+              {{ formatDate(event.startDate) }}
+            </div>
+
+            <div class="meta-item" *ngIf="event.location">
+              {{ event.location }}
+            </div>
+
+            <div class="meta-item">
+              {{ getParticipantCount(event.id ?? '') }}{{ (event.capacity ?? 0) > 0 ? '/' + event.capacity : '' }} participants
+            </div>
+          </div>
+
+          <div class="event-actions">
+            <a [routerLink]="['/events', event.id, 'edit']" class="btn-icon" title="Edit">
+              ✏️
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

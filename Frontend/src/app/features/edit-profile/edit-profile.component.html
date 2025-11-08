@@ -1,0 +1,77 @@
+<section class="edit-profile-page">
+  <div class="edit-profile-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <svg class="spinner" width="48" height="48" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+        <path d="M12 2C6.477 2 2 6.477 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+      </svg>
+      <p>Loading profile...</p>
+    </div>
+
+    <!-- Profile Edit Form -->
+    <div *ngIf="!isLoading" class="form-container">
+      <div class="page-header">
+        <div class="header-content">
+          <h1>Edit Profile</h1>
+          <p>Update your personal information below</p>
+        </div>
+        <button type="button" class="btn-close" routerLink="/profile" title="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #form="ngForm" class="profile-form">
+
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="firstName" class="required">First Name</label>
+          <input id="firstName" name="firstName" type="text" [(ngModel)]="firstName"
+                 class="form-input" required minlength="2" maxlength="100" />
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" type="text" [(ngModel)]="lastName"
+                 class="form-input" maxlength="100" />
+        </div>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username" class="required">Username</label>
+          <input id="username" name="username" type="text" [(ngModel)]="username"
+                 class="form-input" required minlength="3" maxlength="50" />
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" [(ngModel)]="email"
+                 class="form-input" placeholder="example@email.com" maxlength="150" />
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" (click)="cancel()" [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">Save Changes</span>
+            <span *ngIf="isSubmitting" class="loading">
+              <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+                <path d="M12 2C6.477 2 2 6.477 2 12" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+              Saving...
+            </span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
