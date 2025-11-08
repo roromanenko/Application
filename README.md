@@ -2,6 +2,17 @@
 
 A full-stack event management application built with .NET 9, Angular 20, and PostgreSQL.
 
+## 🚀 Live Demo
+
+**🌐 Deployed Application:** [Organiza — Event Management System](https://organiza-frontend.onrender.com/)
+
+> ⚠️ **Note:**  
+> This project is hosted on a free Render instance.  
+> The server may go to sleep after a period of inactivity.  
+> If the app doesn’t respond immediately — please wait **30–60 seconds** after the first request, it will wake up automatically.
+
+---
+
 ## Architecture
 
 - Backend .NET 9 Web API with JWT authentication
