@@ -16,20 +16,77 @@ namespace Infrastructure.Persistence.Repositories
 
 		public async Task<EventEntity> CreateEvent(EventEntity newEvent)
 		{
+			foreach (var tag in newEvent.Tags)
+			{
+				_dbContext.Tags.Attach(tag);
+			}
+
 			await _dbContext.Events.AddAsync(newEvent);
 			await _dbContext.SaveChangesAsync();
+
+			foreach (var tag in newEvent.Tags)
+			{
+				_dbContext.Entry(tag).State = EntityState.Detached;
+			}
+
+			newEvent.Tags.Clear();
+			await _dbContext.Entry(newEvent).Collection(x => x.Tags).LoadAsync();
+
 			return newEvent;
+		}
+
+		public async Task<bool> AddTagsToEvent(Guid eventId, IEnumerable<Guid> tagIds)
+		{
+			var eventEntity = await _dbContext.Events
+				.Include(e => e.Tags)
+				.FirstOrDefaultAsync(e => e.Id == eventId);
+
+			if (eventEntity == null)
+				return false;
+
+			var tags = await _dbContext.Tags
+				.Where(t => tagIds.Contains(t.Id))
+				.ToListAsync();
+
+			foreach (var tag in tags)
+			{
+				if (!eventEntity.Tags.Contains(tag))
+					eventEntity.Tags.Add(tag);
+			}
+
+			await _dbContext.SaveChangesAsync();
+			return true;
+		}
+
+		public async Task<bool> RemoveTagFromEvent(Guid eventId, Guid tagId)
+		{
+			var eventEntity = await _dbContext.Events
+				.Include(e => e.Tags)
+				.FirstOrDefaultAsync(e => e.Id == eventId);
+
+			if (eventEntity == null)
+				return false;
+
+			var tag = eventEntity.Tags.FirstOrDefault(t => t.Id == tagId);
+			if (tag == null)
+				return false;
+
+			eventEntity.Tags.Remove(tag);
+			await _dbContext.SaveChangesAsync();
+			return true;
 		}
 
 		public async Task<EventEntity?> GetEventById(Guid eventId)
 		{
 			return await _dbContext.Events
+				.Include(x => x.Tags)
 				.FirstOrDefaultAsync(e => e.Id == eventId);
 		}
 
 		public async Task<IEnumerable<EventEntity>> GetEventsByTitle(string title)
 		{
 			return await _dbContext.Events
+				.Include(x => x.Tags)
 				.Where(e => EF.Functions.ILike(e.Title, $"%{title}%"))
 				.ToListAsync();
 		}
@@ -37,13 +94,14 @@ namespace Infrastructure.Persistence.Repositories
 		public async Task<IEnumerable<EventEntity>> GetEventsByOrganizer(Guid organizerId)
 		{
 			return await _dbContext.Events
+				.Include(x => x.Tags)
 				.Where(e => e.OrganizerId == organizerId)
 				.ToListAsync();
 		}
 
 		public async Task<IEnumerable<EventEntity>> GetEvents(EventQueryOptions options)
 		{
-			var query = _dbContext.Events.AsQueryable();
+			var query = _dbContext.Events.Include(x => x.Tags).AsQueryable();
 
 			if (!string.IsNullOrEmpty(options.OrganizerId))
 			{

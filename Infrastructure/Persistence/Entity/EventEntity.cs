@@ -44,5 +44,6 @@ namespace Infrastructure.Persistence.Entity
 		public UserEntity Organizer { get; set; } = null!;
 
 		public ICollection<ParticipantEntity> Participants { get; set; } = new List<ParticipantEntity>();
+		public ICollection<TagEntity> Tags { get; set; } = new List<TagEntity>();
 	}
 }

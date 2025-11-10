@@ -11,6 +11,7 @@
 		string? Location,
 		bool IsPublic,
 		int Capacity,
+		List<TagDto> Tags,
 		DateTimeOffset CreatedAt,
 		DateTimeOffset UpdatedAt
 	);

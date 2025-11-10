@@ -42,6 +42,7 @@ namespace Api.Extensions
 			services.AddScoped<IJwtService, JwtService>();
 			services.AddScoped<PasswordHasher<UserEntity>>();
 			services.AddScoped<IEventService, EventService>();
+			services.AddScoped<ITagService, TagService>();
 
 			services.AddAutoMapper(cfg =>
 			{
@@ -51,6 +52,8 @@ namespace Api.Extensions
 				cfg.AddProfile<ParticipantDtoProfile>();
 				cfg.AddProfile<EventProfile>();
 				cfg.AddProfile<EventDtoProfile>();
+				cfg.AddProfile<TagProfile>();
+				cfg.AddProfile<TagDtoProfile>();
 			});
 
 			return services;
@@ -74,6 +77,7 @@ namespace Api.Extensions
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IParticipantRepository, ParticipantRepository>();
 			services.AddScoped<IEventRepository, EventRepository>();
+			services.AddScoped<ITagRepository, TagRepository>();
 
 			return services;
 		}

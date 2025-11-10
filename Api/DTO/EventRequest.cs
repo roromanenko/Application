@@ -7,7 +7,8 @@
 		DateTime EndDate,
 		string? Location,
 		int? Capacity,
-		bool IsPublic
+		bool IsPublic,
+		IEnumerable<string>? Tags
 	);
 
 	public record UpdateEventRequest(
@@ -17,6 +18,7 @@
 		DateTime EndDate,
 		string? Location,
 		int? Capacity,
-		bool IsPublic
+		bool IsPublic,
+		IEnumerable<string>? Tags
 	);
 }
