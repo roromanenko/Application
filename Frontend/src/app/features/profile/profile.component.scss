@@ -471,6 +471,34 @@ $font-headings: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-s
   }
 }
 
+.event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+
+  .tag-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba($primary-green, 0.1), rgba($light-green, 0.15));
+    color: $secondary-green;
+    font-family: $font-primary;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba($secondary-green, 0.15);
+    user-select: none;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: linear-gradient(135deg, rgba($primary-green, 0.2), rgba($light-green, 0.3));
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba($secondary-green, 0.1);
+    }
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

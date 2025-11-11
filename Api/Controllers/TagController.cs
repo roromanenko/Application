@@ -9,7 +9,6 @@ namespace Api.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	[Authorize(Roles = "admin")]
 	public class TagController : BaseController
 	{
 		private readonly IMapper _mapper;
@@ -24,6 +23,7 @@ namespace Api.Controllers
 		}
 
 		[HttpGet]
+		[Authorize]
 		public async Task<ActionResult<ApiResponse<IEnumerable<TagDto>>>> GetAllTags()
 		{
 			var tags = await _tagService.GetAllTagsAsync();
@@ -33,6 +33,7 @@ namespace Api.Controllers
 		}
 
 		[HttpGet("{id}")]
+		[Authorize]
 		public async Task<ActionResult<ApiResponse<TagDto>>> GetTagById(string id)
 		{
 			var tag = await _tagService.GetTagByIdAsync(id);
@@ -44,6 +45,7 @@ namespace Api.Controllers
 		}
 
 		[HttpPost]
+		[Authorize(Roles = "admin")]
 		public async Task<ActionResult<ApiResponse<TagDto>>> CreateTag([FromBody] TagDtoRequest request)
 		{
 			try
@@ -67,6 +69,7 @@ namespace Api.Controllers
 		}
 
 		[HttpDelete("{id}")]
+		[Authorize(Roles = "admin")]
 		public async Task<ActionResult<ApiResponse<bool>>> DeleteTag(string id)
 		{
 			try

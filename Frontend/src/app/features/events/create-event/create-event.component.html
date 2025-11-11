@@ -106,7 +106,7 @@
         </div>
       </div>
 
-      <!-- Capacity (NEW) -->
+      <!-- Capacity -->
       <div class="form-group">
         <label for="capacity">Maximum Capacity</label>
         <input type="number"
@@ -126,6 +126,34 @@
         <span class="error-message" *ngIf="capacityField.invalid && capacityField.touched">
           <span *ngIf="capacityField.errors?.['min']">Capacity cannot be negative</span>
         </span>
+      </div>
+
+      <!-- Tags -->
+      <div class="form-group">
+        <label for="tags">Tags</label>
+
+        <div class="tags-container" id="tags">
+          <div *ngIf="allTags.length > 0; else noTags" class="tags-list">
+            <div *ngFor="let tag of allTags"
+                 class="tag-item"
+                 [class.selected]="isTagSelected(tag.id!)">
+              <input type="checkbox"
+                     [checked]="isTagSelected(tag.id!)"
+                     (change)="toggleTag(tag.id!)"
+                     [disabled]="!isTagSelected(tag.id!) && selectedTagIds.length >= 5"
+                     id="tag-{{ tag.id }}" />
+              <label for="tag-{{ tag.id }}">{{ tag.name }}</label>
+            </div>
+          </div>
+
+          <ng-template #noTags>
+            <div class="tags-empty">No tags available</div>
+          </ng-template>
+        </div>
+
+        <div class="tag-info">
+          Selected: {{ selectedTagIds.length }} / 5
+        </div>
       </div>
 
       <!-- Visibility Toggle -->

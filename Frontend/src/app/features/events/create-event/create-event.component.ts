@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Client, CreateEventRequest } from '../../../core/api/generated-api';
+import { Client, CreateEventRequest, TagDto } from '../../../core/api/generated-api';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -23,6 +23,8 @@ export class CreateEventComponent {
   isSubmitting = false;
   minDate: string;
   minEndDate: string;
+  allTags: TagDto[] = [];
+  selectedTagIds: string[] = [];
 
   constructor(
     private client: Client,
@@ -37,6 +39,34 @@ export class CreateEventComponent {
     const endDateTime = new Date(now.getTime() + 60 * 60 * 1000);
     this.endDate = endDateTime.toISOString().slice(0, 16);
     this.minEndDate = this.startDate;
+
+    this.loadTags();
+  }
+
+  loadTags() {
+    this.client.tagGET().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.allTags = res.data;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load tags:', err);
+        this.notification.error('Failed to load tags');
+      }
+    });
+  }
+
+  toggleTag(tagId: string) {
+    if (this.selectedTagIds.includes(tagId)) {
+      this.selectedTagIds = this.selectedTagIds.filter(id => id !== tagId);
+    } else {
+      this.selectedTagIds.push(tagId);
+    }
+  }
+
+  isTagSelected(tagId: string): boolean {
+    return this.selectedTagIds.includes(tagId);
   }
 
   onStartDateChange() {
@@ -73,7 +103,8 @@ export class CreateEventComponent {
       endDate: new Date(this.endDate),
       location: this.location.trim() || undefined,
       capacity: this.capacity ?? 0,
-      isPublic: this.isPublic
+      isPublic: this.isPublic,
+      tags: this.selectedTagIds
     });
 
     this.client.eventPOST(request).subscribe({

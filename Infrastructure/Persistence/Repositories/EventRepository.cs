@@ -135,9 +135,31 @@ namespace Infrastructure.Persistence.Repositories
 
 		public async Task<bool> UpdateEvent(EventEntity updatedEvent)
 		{
-			updatedEvent.UpdatedAt = DateTimeOffset.UtcNow;
-			_dbContext.Events.Update(updatedEvent);
+			var existingEvent = await _dbContext.Events
+				.Include(e => e.Tags)
+				.FirstOrDefaultAsync(e => e.Id == updatedEvent.Id);
+
+			if (existingEvent == null)
+				return false;
+
+			_dbContext.Entry(existingEvent).CurrentValues.SetValues(updatedEvent);
+
+			existingEvent.Tags.Clear();
+
+			if (updatedEvent.Tags != null && updatedEvent.Tags.Any())
+			{
+				foreach (var tag in updatedEvent.Tags)
+				{
+					var existingTag = await _dbContext.Tags.FindAsync(tag.Id);
+					if (existingTag != null)
+						existingEvent.Tags.Add(existingTag);
+				}
+			}
+
+			existingEvent.UpdatedAt = DateTimeOffset.UtcNow;
+
 			var result = await _dbContext.SaveChangesAsync();
+
 			return result > 0;
 		}
 

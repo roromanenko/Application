@@ -12,10 +12,13 @@ import { constants } from '../../../shared/constants';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './event-list.component.html',
-  styleUrls: ['./event-list.component.scss']
+  styleUrls: ['./event-list.component.scss'],
 })
 export class EventsListComponent implements OnInit {
   events: EventDto[] = [];
+  allTags: any[] = [];
+  selectedTagIds: string[] = [];
+  isTagDropdownOpen = false;
   participantCounts = new Map<string, number>();
   isLoading = false;
 
@@ -34,7 +37,17 @@ export class EventsListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadTags();
     this.loadEvents();
+  }
+
+  loadTags(): void {
+    this.client.tagGET().subscribe({
+      next: res => {
+        if (res.success && res.data) this.allTags = res.data;
+      },
+      error: err => console.error('Failed to load tags', err)
+    });
   }
 
   loadEvents(): void {
@@ -59,6 +72,7 @@ export class EventsListComponent implements OnInit {
       next: res => {
         if (res.success && res.data) {
           this.events = this.normalizeEvents(res.data);
+          this.filterEventsByTags();
           this.loadParticipantCounts();
         }
         this.isLoading = false;
@@ -72,6 +86,7 @@ export class EventsListComponent implements OnInit {
       next: res => {
         if (res.success && res.data) {
           this.events = this.normalizeEvents(res.data);
+          this.filterEventsByTags();
           this.loadParticipantCounts();
         }
         this.isLoading = false;
@@ -85,6 +100,7 @@ export class EventsListComponent implements OnInit {
       next: res => {
         if (res.success && res.data) {
           this.events = this.normalizeEvents(res.data);
+          this.filterEventsByTags();
           this.loadParticipantCounts();
         }
         this.isLoading = false;
@@ -131,6 +147,20 @@ export class EventsListComponent implements OnInit {
     this.loadEvents();
   }
 
+  toggleTagDropdown(): void {
+    this.isTagDropdownOpen = !this.isTagDropdownOpen;
+  }
+
+  toggleTag(tagId: string): void {
+    if (this.selectedTagIds.includes(tagId)) {
+      this.selectedTagIds = this.selectedTagIds.filter(id => id !== tagId);
+    } else {
+      this.selectedTagIds.push(tagId);
+    }
+    this.loadEvents();
+  }
+
+
   nextPage(): void {
     this.currentPage++;
     this.loadEvents();
@@ -152,6 +182,20 @@ export class EventsListComponent implements OnInit {
       if (dto.endDate) dto.endDate = new Date(dto.endDate);
       return dto;
     });
+  }
+
+  private filterEventsByTags(): void {
+    if (this.selectedTagIds.length === 0) return;
+    this.events = this.events.filter(e =>
+      e.tags?.some(t => this.selectedTagIds.includes(t.id!))
+    );
+  }
+
+  clearAllFilters(): void {
+    this.searchTitle = '';
+    this.activeFilter = 'all';
+    this.selectedTagIds = [];
+    this.loadEvents();
   }
 
   private handleError(defaultMsg: string, err: any): void {
