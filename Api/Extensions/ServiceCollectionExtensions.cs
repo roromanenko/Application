@@ -3,6 +3,7 @@ using Core.Interfaces;
 using Core.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Infrastructure.AI;
 using Infrastructure.Interfaces;
 using Infrastructure.Mapping.Profiles;
 using Infrastructure.Persistence;
@@ -12,6 +13,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -24,6 +26,7 @@ namespace Api.Extensions
 			services.AddHttpServices();
 			services.AddApplicationServices(configuration);
 			services.AddDbServices(configuration);
+			services.AddAiServices(configuration);
 			services.AddJwtAuthentication(configuration);
 			services.AddValidationServices();
 			return services;
@@ -78,6 +81,30 @@ namespace Api.Extensions
 			services.AddScoped<IParticipantRepository, ParticipantRepository>();
 			services.AddScoped<IEventRepository, EventRepository>();
 			services.AddScoped<ITagRepository, TagRepository>();
+
+			return services;
+		}
+
+		private static IServiceCollection AddAiServices(this IServiceCollection services, IConfiguration configuration)
+		{
+			services.Configure<GroqOptions>(
+				configuration.GetSection(GroqOptions.SectionName));
+
+			var groqOptions = configuration.GetSection(GroqOptions.SectionName).Get<GroqOptions>();
+			if (groqOptions == null || string.IsNullOrWhiteSpace(groqOptions.ApiKey))
+			{
+				throw new InvalidOperationException(
+					"Groq API configuration is missing or invalid. Please check appsettings.json");
+			}
+
+			services.AddHttpClient<IAiAssistantService, GroqAiService>((serviceProvider, client) =>
+			{
+				var options = serviceProvider.GetRequiredService<IOptions<GroqOptions>>().Value;
+				client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+				client.DefaultRequestHeaders.Add("User-Agent", "Organiza-AI-Assistant/1.0");
+			});
+
+			services.AddScoped<ISqlExecutor, SqlExecutor>();
 
 			return services;
 		}

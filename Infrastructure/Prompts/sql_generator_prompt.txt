@@ -1,0 +1,157 @@
+[=== MAIN PROMPT ===]
+
+You need to generate a single SQL query for a PostgreSQL database to extract the data described in the section [=== USER REQUEST ===].
+Use the database structure provided in [=== DDL ===] and apply the business mappings and enumerations from [=== BUSINESS MAPPING ===].
+
+Instructions:
+• Generate only ONE SQL query (SELECT only).
+• Do NOT include INSERT, UPDATE, DELETE, ALTER, DROP, CREATE, or any other non-SELECT operations.
+• Use only the tables and fields that exist in the provided DDL.
+• Use clear aliases and readable column names.
+• Prefer INNER JOINs unless LEFT JOINs are clearly required.
+• Include WHERE, GROUP BY, and ORDER BY clauses only when they are relevant.
+• Return all results as a JSON object strictly following the structure below.
+• For text comparisons, prefer using LOWER(column) and LIKE '%keyword%' to make matching case-insensitive.
+
+Special rules:
+1. If the user's request logically requires several SQL statements — return only one, and in the notes explain briefly why only one SQL was created and what the user should do to get the others.
+2. If the request doesn't match the database structure and the SQL can't be created — do not invent or hallucinate tables or fields.  
+   Instead, leave "sql" empty and provide a short explanation in "notes" describing why it can't be generated,  
+   and suggest an improved "request" that better aligns with the actual database structure and data.
+
+IMPORTANT: PostgreSQL naming conventions:
+- All table names must be wrapped in double quotes: "events", "users", "participants"
+- All column names use PascalCase and must be wrapped in double quotes: "Id", "Title", "StartDate"
+- Example: SELECT e."Id", e."Title" FROM "Events" e WHERE e."IsPublic" = TRUE
+
+Return the result as JSON only in this format:
+
+{
+  "sql": "",
+  "explanation": "",
+  "request": "",
+  "notes": ""
+}
+
+Examples:
+
+Example 1.
+Request: “What events am I attending this week?”
+Expected JSON:
+{
+  "sql": "SELECT e.id, e.title, e.start_date, e.end_date, e.location FROM events e INNER JOIN participants p ON e.id = p.event_id INNER JOIN users u ON u.id = p.user_id WHERE u.id = '<USER_ID>' AND e.start_date >= DATE_TRUNC('week', NOW()) AND e.start_date < DATE_TRUNC('week', NOW()) + INTERVAL '7 days' ORDER BY e.start_date;",
+  "explanation": "This SQL returns all events the current user is attending during the current week, including their title, dates, and location.",
+  "request": "Show all events the current user is attending during this week.",
+  "notes": ""
+}
+
+Example 2.
+Request: “Show public tech events this weekend.”
+Expected JSON:
+{
+  "sql": "SELECT e.id, e.title, e.start_date, e.end_date, e.location FROM events e INNER JOIN event_tags et ON e.id = et.event_id INNER JOIN tags t ON et.tag_id = t.id WHERE e.is_public = TRUE AND LOWER(t.name) LIKE '%tech%' AND e.start_date >= DATE_TRUNC('week', NOW()) + INTERVAL '5 days' AND e.start_date < DATE_TRUNC('week', NOW()) + INTERVAL '7 days' ORDER BY e.start_date;",
+  "explanation": "This SQL lists all public events with the tag containing 'tech' that take place during the upcoming weekend.",
+  "request": "Show all public events tagged as 'tech' occurring this weekend.",
+  "notes": ""
+}
+
+Example 3.
+Request: “Where is the Design Sprint?”
+Expected JSON:
+{
+  "sql": "SELECT e.id, e.title, e.location, e.start_date FROM events e WHERE LOWER(e.title) LIKE '%design sprint%';",
+  "explanation": "This SQL retrieves the location and start date of the event called 'Design Sprint'.",
+  "request": "Show the location and time of the event titled 'Design Sprint'.",
+  "notes": ""
+}
+
+Example 4.
+Request: “Who’s attending the Marketing Meetup?”
+Expected JSON:
+{
+  "sql": "SELECT u.first_name, u.last_name, u.email FROM participants p INNER JOIN users u ON p.user_id = u.id INNER JOIN events e ON e.id = p.event_id WHERE LOWER(e.title) LIKE '%marketing meetup%';",
+  "explanation": "This SQL lists all users attending the event titled 'Marketing Meetup'.",
+  "request": "List all participants for the event called 'Marketing Meetup'.",
+  "notes": ""
+}
+
+[=== USER REQUEST ===]
+
+
+[=== BUSINESS MAPPING ===]
+
+user → users  
+user id → users.id  
+username → users.username  
+email → users.email  
+first name → users.first_name  
+last name → users.last_name  
+organizer → events.organizer_id  
+participant → participants.user_id
+attendee → participants.user_id    
+event → events  
+event id → events.id  
+event title → events.title  
+event description → events.description  
+event location → events.location  
+event start date → events.start_date  
+event end date → events.end_date  
+event capacity → events.capacity  
+event visibility → events.is_public  
+tag → tags.name  
+event tag → event_tags  
+created at → events.created_at  
+updated at → events.updated_at  
+attending → participants  
+my events → events.organizer_id = current_user_id  
+public events → events.is_public = TRUE  
+private events → events.is_public = FALSE
+
+[=== DDL ===]
+
+CREATE TABLE "users" (
+    "Id" uuid PRIMARY KEY,
+    "Username" varchar(100) NOT NULL,
+    "Email" varchar(256) NOT NULL,
+    "FirstName" varchar(100) NOT NULL,
+    "LastName" varchar(100) NOT NULL,
+    "PasswordHash" text NOT NULL,
+    "Roles" jsonb NOT NULL
+);
+
+CREATE TABLE "tags" (
+    "Id" uuid PRIMARY KEY,
+    "Name" varchar(50) NOT NULL
+);
+
+CREATE TABLE "participants" (
+    "Id" uuid PRIMARY KEY,
+    "UserId" uuid NOT NULL,
+    "EventId" uuid NOT NULL,
+    "CreatedAt" timestamptz NOT NULL,
+    FOREIGN KEY ("EventId") REFERENCES "Events" ("Id") ON DELETE CASCADE,
+    FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "events" (
+    "Id" uuid PRIMARY KEY,
+    "Title" varchar(200) NOT NULL,
+    "Description" varchar(2000),
+    "OrganizerId" uuid NOT NULL,
+    "StartDate" timestamptz NOT NULL,
+    "EndDate" timestamptz NOT NULL,
+    "Location" varchar(500),
+    "IsPublic" boolean NOT NULL,
+    "Capacity" integer NOT NULL,
+    "CreatedAt" timestamptz NOT NULL,
+    "UpdatedAt" timestamptz NOT NULL,
+    FOREIGN KEY ("OrganizerId") REFERENCES "Users" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "event_tags" (
+    "EventId" uuid NOT NULL,
+    "TagId" uuid NOT NULL,
+    PRIMARY KEY ("EventId", "TagId"),
+    FOREIGN KEY ("EventId") REFERENCES "Events" ("Id") ON DELETE CASCADE,
+    FOREIGN KEY ("TagId") REFERENCES "Tags" ("Id") ON DELETE CASCADE
+);
