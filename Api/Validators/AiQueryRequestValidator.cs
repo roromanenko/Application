@@ -20,7 +20,6 @@ namespace Api.Validators
 
 		private bool BeValidQuery(string query)
 		{
-			// Проверка на потенциально опасные символы
 			var dangerousPatterns = new[] { ";--", "/*", "*/", "xp_", "sp_" };
 			return !dangerousPatterns.Any(pattern =>
 				query.Contains(pattern, StringComparison.OrdinalIgnoreCase));

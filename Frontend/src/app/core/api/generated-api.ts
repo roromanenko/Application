@@ -29,6 +29,83 @@ export class Client {
      * @param body (optional) 
      * @return OK
      */
+    query(body?: AiQueryRequest | undefined): Observable<AiAssistantResponse> {
+        let url_ = this.baseUrl + "/api/AiAssistant/query";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuery(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuery(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AiAssistantResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AiAssistantResponse>;
+        }));
+    }
+
+    protected processQuery(response: HttpResponseBase): Observable<AiAssistantResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AiAssistantResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ProblemDetails.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
     eventPOST(body?: CreateEventRequest | undefined): Observable<EventDtoApiResponse> {
         let url_ = this.baseUrl + "/api/Event";
         url_ = url_.replace(/[?&]$/, "");
@@ -1324,6 +1401,110 @@ export class Client {
     }
 }
 
+export class AiAssistantResponse implements IAiAssistantResponse {
+    success?: boolean;
+    answer?: string | undefined;
+    data?: { [key: string]: any; }[] | undefined;
+    query?: string | undefined;
+    explanation?: string | undefined;
+    errorMessage?: string | undefined;
+    resultCount?: number;
+
+    constructor(data?: IAiAssistantResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.answer = _data["answer"];
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(item);
+            }
+            this.query = _data["query"];
+            this.explanation = _data["explanation"];
+            this.errorMessage = _data["errorMessage"];
+            this.resultCount = _data["resultCount"];
+        }
+    }
+
+    static fromJS(data: any): AiAssistantResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AiAssistantResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["answer"] = this.answer;
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item);
+        }
+        data["query"] = this.query;
+        data["explanation"] = this.explanation;
+        data["errorMessage"] = this.errorMessage;
+        data["resultCount"] = this.resultCount;
+        return data;
+    }
+}
+
+export interface IAiAssistantResponse {
+    success?: boolean;
+    answer?: string | undefined;
+    data?: { [key: string]: any; }[] | undefined;
+    query?: string | undefined;
+    explanation?: string | undefined;
+    errorMessage?: string | undefined;
+    resultCount?: number;
+}
+
+export class AiQueryRequest implements IAiQueryRequest {
+    query!: string;
+
+    constructor(data?: IAiQueryRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.query = _data["query"];
+        }
+    }
+
+    static fromJS(data: any): AiQueryRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AiQueryRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["query"] = this.query;
+        return data;
+    }
+}
+
+export interface IAiQueryRequest {
+    query: string;
+}
+
 export class BooleanApiResponse implements IBooleanApiResponse {
     success?: boolean;
     message?: string | undefined;
@@ -1938,6 +2119,70 @@ export interface IParticipantDtoIEnumerableApiResponse {
     success?: boolean;
     message?: string | undefined;
     data?: ParticipantDto[] | undefined;
+}
+
+export class ProblemDetails implements IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IProblemDetails) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.type = _data["type"];
+            this.title = _data["title"];
+            this.status = _data["status"];
+            this.detail = _data["detail"];
+            this.instance = _data["instance"];
+        }
+    }
+
+    static fromJS(data: any): ProblemDetails {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemDetails();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["type"] = this.type;
+        data["title"] = this.title;
+        data["status"] = this.status;
+        data["detail"] = this.detail;
+        data["instance"] = this.instance;
+        return data;
+    }
+}
+
+export interface IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
 }
 
 export class RegisterRequest implements IRegisterRequest {
