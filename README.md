@@ -5,11 +5,30 @@ A full-stack event management application built with .NET 9, Angular 20, and Pos
 ## 🚀 Live Demo
 
 **🌐 Deployed Application:** [Organiza — Event Management System](https://organiza-frontend.onrender.com/)
+> This environment contains test/demo data, so you can freely explore the API, event system, and the new AI Assistant without affecting any production information.
 
-> ⚠️ **Note:**  
-> This project is hosted on a free Render instance.  
-> The server may go to sleep after a period of inactivity.  
-> If the app doesn’t respond immediately — please wait **30–60 seconds** after the first request, it will wake up automatically.
+---
+
+## AI Assistant (New Feature)
+A new **AI-powered** assistant has been integrated into the platform to make interaction with event data more natural and intuitive.
+
+What the AI Assistant Does
+- It understands natural-language questions from the user such as:
+  - “What events am I attending this week?”
+  - "Where is my next event located?"
+- Instead of relying on static snapshots, the assistant:
+  - Generates SQL queries dynamically based on the user’s request
+  - Converts the result into a friendly, conversational response in the user’s language
+  
+### Security Measures
+The assistant can perform only `SELECT` queries. Cannot `INSERT`, `UPDATE`, `DELETE`, or modify schema in any way. This ensures that the AI Assistant is both powerful and completely safe for production use.
+
+## Tags System (New Feature)
+A new tag system has been added to improve event categorization and filtering. Events can now be linked to one or more tags.
+Permissions
+- Only users with the `admin` role are allowed to create new tags
+- Regular users can view tags and assign existing ones to their events
+- Tags are stored in a dedicated table and linked through the `event_tags` relationship
 
 ---
 
