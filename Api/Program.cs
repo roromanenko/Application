@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 var allowedOrigins = builder.Environment.IsDevelopment()
-	? new[] { "http://localhost:50214", "http://localhost:4200" }
+	? new[] { "http://localhost:5000", "http://localhost:4200" }
 	: new[]
 	{
 		"https://organiza-frontend.onrender.com",
