@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Client, UpdateEventRequest, EventDto } from '../../../core/api/generated-api';
+import { Client, UpdateEventRequest, EventDto, TagDto } from '../../../core/api/generated-api';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -25,6 +25,8 @@ export class EditEventComponent implements OnInit {
   isLoading = true;
   minDate: string;
   minEndDate: string;
+  allTags: TagDto[] = [];
+  selectedTagIds: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -36,6 +38,41 @@ export class EditEventComponent implements OnInit {
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     this.minDate = now.toISOString().slice(0, 16);
     this.minEndDate = this.minDate;
+
+    this.loadTags();
+  }
+
+  loadTags() {
+    this.client.tagGET().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.allTags = res.data;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load tags:', err);
+        this.notification.error('Failed to load tags');
+      }
+    });
+  }
+
+  toggleTag(tagId: string) {
+    const isSelected = this.selectedTagIds.includes(tagId);
+
+    if (isSelected) {
+      this.selectedTagIds = this.selectedTagIds.filter(id => id !== tagId);
+    } else {
+      if (this.selectedTagIds.length >= 5) {
+        this.notification.warning('You can select up to 5 tags only');
+        return;
+      }
+
+      this.selectedTagIds.push(tagId);
+    }
+  }
+
+  isTagSelected(tagId: string): boolean {
+    return this.selectedTagIds.includes(tagId);
   }
 
   ngOnInit() {
@@ -59,6 +96,7 @@ export class EditEventComponent implements OnInit {
           this.location = event.location ?? '';
           this.capacity = event.capacity ?? null;
           this.isPublic = event.isPublic ?? true;
+          this.selectedTagIds = event.tags?.map(t => t.id!) ?? [];
         } else {
           this.notification.error('Event not found');
           this.router.navigate(['/events']);
@@ -104,7 +142,8 @@ export class EditEventComponent implements OnInit {
       endDate: new Date(this.endDate),
       location: this.location.trim() || undefined,
       capacity: this.capacity ?? 0,
-      isPublic: this.isPublic
+      isPublic: this.isPublic,
+      tags: this.selectedTagIds
     });
 
     this.client.eventPUT(this.id, request).subscribe({

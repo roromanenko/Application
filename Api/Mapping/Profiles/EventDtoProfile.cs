@@ -8,8 +8,18 @@ namespace Api.Mapping.Profiles
 	{
 		public EventDtoProfile()
 		{
-			CreateMap<CreateEventRequest, Event>();
-			CreateMap<UpdateEventRequest, Event>();
+			CreateMap<CreateEventRequest, Event>()
+				.ForMember(dest => dest.Tags, opt => opt.MapFrom(src =>
+					src.Tags != null
+						? src.Tags.Select(id => new Tag { Id = id, Name = string.Empty }).ToList()
+						: new List<Tag>()));
+
+			CreateMap<UpdateEventRequest, Event>()
+				.ForMember(dest => dest.Tags, opt => opt.MapFrom(src =>
+					src.Tags != null
+						? src.Tags.Select(id => new Tag { Id = id, Name = string.Empty }).ToList()
+						: new List<Tag>()));
+
 			CreateMap<Event, EventDto>().ReverseMap();
 		}
 	}

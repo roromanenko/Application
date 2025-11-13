@@ -92,6 +92,12 @@
             <a [routerLink]="['/events', event.id]">{{ event.title }}</a>
           </h3>
 
+          <div class="event-tags" *ngIf="event.tags && event.tags.length > 0">
+            <span class="tag-chip" *ngFor="let tag of event.tags">
+              {{ tag.name }}
+            </span>
+          </div>
+
           <p class="event-description" *ngIf="event.description">
             {{ event.description.length > 120 ? (event.description.substring(0, 120) + '...') : event.description }}
           </p>
@@ -142,6 +148,12 @@
           <h3 class="event-title">
             <a [routerLink]="['/events', event.id]">{{ event.title }}</a>
           </h3>
+
+          <div class="event-tags" *ngIf="event.tags && event.tags.length > 0">
+            <span class="tag-chip" *ngFor="let tag of event.tags">
+              {{ tag.name }}
+            </span>
+          </div>
 
           <p class="event-description" *ngIf="event.description">
             {{ event.description.length > 120 ? (event.description.substring(0, 120) + '...') : event.description }}

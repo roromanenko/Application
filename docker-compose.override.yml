@@ -4,6 +4,7 @@ services:
       - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=false
       - Jwt__Issuer=http://localhost:5000
       - Jwt__Audience=http://localhost:5000
+      - Groq_ApiKey=ghk_yourgroqapikey
     volumes:
       - ./Api/logs:/app/logs
 

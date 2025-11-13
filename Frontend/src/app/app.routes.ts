@@ -9,6 +9,7 @@ import { EventDetailComponent } from './features/events/event-detail/event-detai
 import { EditEventComponent } from './features/events/edit-event/edit-event.component';
 import { EditProfileComponent } from './features/edit-profile/edit-profile.component';
 import { CalendarComponent } from './features/calendar/calendar.component';
+import { AssistantComponent } from './features/assistant/assistant.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,6 +21,6 @@ export const routes: Routes = [
   { path: 'events', component: EventsListComponent },
   { path: 'events/:id/edit', component: EditEventComponent },
   { path: 'profile/edit', component: EditProfileComponent },
-  { path: 'calendar', component: CalendarComponent }
-
+  { path: 'calendar', component: CalendarComponent },
+  { path: 'assistant', component: AssistantComponent }
 ];

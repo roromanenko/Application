@@ -18,6 +18,7 @@ namespace Core.Domain
 		public string? Location { get; set; }
 		public bool IsPublic { get; set; } = true;
 		public int Capacity { get; set; }
+		public List<Tag> Tags { get; set; } = new();
 
 		public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.Now;
 		public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.Now;

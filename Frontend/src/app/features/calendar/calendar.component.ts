@@ -179,13 +179,16 @@ export class CalendarComponent implements OnInit {
 
         const calendarEvents = Array.from(allEventsMap.values()).map(event => {
           const isOrganizer = event.organizerId === this.currentUserId;
+          const firstTag = event.tags?.[0]?.name ?? undefined;
+          const tagColor = this.getColorByTag(firstTag);
+
           return {
             id: event.id!,
             title: event.title || 'Untitled Event',
             start: new Date(event.startDate!),
             end: new Date(event.endDate!),
-            backgroundColor: isOrganizer ? '#6F8C42' : '#3B82F6',
-            borderColor: isOrganizer ? '#5A7035' : '#2563EB',
+            backgroundColor: isOrganizer ? '#6F8C42' : tagColor,
+            borderColor: isOrganizer ? '#5A7035' : tagColor,
             textColor: '#ffffff',
             extendedProps: {
               location: event.location,
@@ -237,5 +240,32 @@ export class CalendarComponent implements OnInit {
   refreshCalendar() {
     this.loadCalendarEvents();
     this.notification.success('Calendar refreshed');
+  }
+
+  private getColorByTag(tagName?: string): string {
+    if (!tagName) return '#A3A3A3';
+
+    const tag = tagName.toLowerCase();
+
+    if (tag.includes('art')) return '#D946EF';
+    if (tag.includes('board')) return '#8B5CF6';
+    if (tag.includes('charity')) return '#16A34A';
+    if (tag.includes('cinema')) return '#F59E0B';
+    if (tag.includes('comedy')) return '#E11D48';
+    if (tag.includes('conference')) return '#0284C7';
+    if (tag.includes('dance')) return '#EC4899';
+    if (tag.includes('education')) return '#84CC16';
+    if (tag.includes('gaming')) return '#6366F1';
+    if (tag.includes('music')) return '#0EA5E9';
+    if (tag.includes('outdoors')) return '#22C55E';
+    if (tag.includes('party')) return '#F43F5E';
+    if (tag.includes('photography')) return '#06B6D4';
+    if (tag.includes('science')) return '#3B82F6';
+    if (tag.includes('sports')) return '#F97316';
+    if (tag.includes('tech')) return '#14B8A6';
+    if (tag.includes('travel')) return '#0D9488';
+    if (tag.includes('volunteer')) return '#A855F7';
+
+    return '#9CA3AF'; // fallback для неизвестных тегов
   }
 }

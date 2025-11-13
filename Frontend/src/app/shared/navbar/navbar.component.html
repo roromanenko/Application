@@ -14,6 +14,10 @@
          routerLink="/calendar"
          class="nav-link"
          routerLinkActive="active">Calendar</a>
+      <a *ngIf="isLoggedIn"
+         routerLink="/assistant"
+         class="nav-link"
+         routerLinkActive="active">Assistant</a>
     </div>
   </div>
   <div class="nav-right">

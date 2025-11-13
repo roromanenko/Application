@@ -146,6 +146,16 @@
         <h2>About This Event</h2>
         <p *ngIf="event.description" class="event-description">{{ event.description }}</p>
         <p *ngIf="!event.description" class="no-description">No description provided</p>
+
+        <div *ngIf="event?.tags?.length" class="event-tags-section">
+          <h2>Event Tags</h2>
+
+          <div class="event-tags-list">
+            <span class="tag-item" *ngFor="let tag of event.tags">
+              {{ tag.name }}
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- Participants Section -->

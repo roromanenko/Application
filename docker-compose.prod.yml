@@ -12,6 +12,7 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - FrontendUrl=${FRONTEND_URL}
+      - Groq__ApiKey=${GROQ_API_KEY}
     ports:
       - "5000:5000"
     networks:

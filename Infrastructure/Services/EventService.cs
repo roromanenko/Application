@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Options;
 using Infrastructure.Interfaces;
 using Infrastructure.Persistence.Entity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services
 {
@@ -22,7 +23,11 @@ namespace Infrastructure.Services
 
 		public async Task<Event> CreateEventAsync(Event newEvent)
 		{
+			if (newEvent.Tags != null && newEvent.Tags.Count > 5)
+				throw new ValidationException("You can select up to 5 tags only.");
+
 			var entity = _mapper.Map<EventEntity>(newEvent);
+
 			var created = await _eventRepository.CreateEvent(entity);
 			return _mapper.Map<Event>(created);
 		}
@@ -98,6 +103,9 @@ namespace Infrastructure.Services
 
 		public async Task<bool> UpdateEventAsync(Event updatedEvent)
 		{
+			if (updatedEvent.Tags != null && updatedEvent.Tags.Count > 5)
+				throw new ValidationException("You can select up to 5 tags only.");
+
 			var entity = _mapper.Map<EventEntity>(updatedEvent);
 			return await _eventRepository.UpdateEvent(entity);
 		}

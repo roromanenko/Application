@@ -29,8 +29,85 @@ export class Client {
      * @param body (optional) 
      * @return OK
      */
+    query(body?: AiQueryRequest | undefined): Observable<AiAssistantResponse> {
+        let url_ = this.baseUrl + "/api/AiAssistant/query";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuery(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuery(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AiAssistantResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AiAssistantResponse>;
+        }));
+    }
+
+    protected processQuery(response: HttpResponseBase): Observable<AiAssistantResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AiAssistantResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ProblemDetails.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
     eventPOST(body?: CreateEventRequest | undefined): Observable<EventDtoApiResponse> {
-        let url_ = this.baseUrl + "/Event";
+        let url_ = this.baseUrl + "/api/Event";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -91,7 +168,7 @@ export class Client {
      * @return OK
      */
     eventGET(page?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDescending?: boolean | undefined, title?: string | undefined, organizerId?: string | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Event?";
+        let url_ = this.baseUrl + "/api/Event?";
         if (page === null)
             throw new globalThis.Error("The parameter 'page' cannot be null.");
         else if (page !== undefined)
@@ -166,7 +243,7 @@ export class Client {
      * @return OK
      */
     eventGET2(id: string): Observable<EventDtoApiResponse> {
-        let url_ = this.baseUrl + "/Event/{id}";
+        let url_ = this.baseUrl + "/api/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -221,7 +298,7 @@ export class Client {
      * @return OK
      */
     eventPUT(id: string, body?: UpdateEventRequest | undefined): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/Event/{id}";
+        let url_ = this.baseUrl + "/api/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -279,7 +356,7 @@ export class Client {
      * @return OK
      */
     eventDELETE(id: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/Event/{id}";
+        let url_ = this.baseUrl + "/api/Event/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -333,7 +410,7 @@ export class Client {
      * @return OK
      */
     mine(): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Event/mine";
+        let url_ = this.baseUrl + "/api/Event/mine";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -387,7 +464,7 @@ export class Client {
      * @return OK
      */
     upcoming(daysAhead?: number | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Event/upcoming?";
+        let url_ = this.baseUrl + "/api/Event/upcoming?";
         if (daysAhead === null)
             throw new globalThis.Error("The parameter 'daysAhead' cannot be null.");
         else if (daysAhead !== undefined)
@@ -452,7 +529,7 @@ export class Client {
      * @return OK
      */
     popular(page?: number | undefined, pageSize?: number | undefined): Observable<EventDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Event/popular?";
+        let url_ = this.baseUrl + "/api/Event/popular?";
         if (page === null)
             throw new globalThis.Error("The parameter 'page' cannot be null.");
         else if (page !== undefined)
@@ -511,7 +588,7 @@ export class Client {
      * @return OK
      */
     count(id: string): Observable<Int32ApiResponse> {
-        let url_ = this.baseUrl + "/Event/{id}/participants/count";
+        let url_ = this.baseUrl + "/api/Event/{id}/participants/count";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -565,7 +642,7 @@ export class Client {
      * @return OK
      */
     join(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/Participant/{eventId}/join";
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/join";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -619,7 +696,7 @@ export class Client {
      * @return OK
      */
     leave(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/Participant/{eventId}/leave";
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/leave";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -673,7 +750,7 @@ export class Client {
      * @return OK
      */
     followers(eventId: string): Observable<ParticipantDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Participant/{eventId}/followers";
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/followers";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -727,7 +804,7 @@ export class Client {
      * @return OK
      */
     isFollowing(eventId: string): Observable<BooleanApiResponse> {
-        let url_ = this.baseUrl + "/Participant/{eventId}/is-following";
+        let url_ = this.baseUrl + "/api/Participant/{eventId}/is-following";
         if (eventId === undefined || eventId === null)
             throw new globalThis.Error("The parameter 'eventId' must be defined.");
         url_ = url_.replace("{eventId}", encodeURIComponent("" + eventId));
@@ -782,7 +859,7 @@ export class Client {
      * @return OK
      */
     following(userId?: string | undefined): Observable<ParticipantDtoIEnumerableApiResponse> {
-        let url_ = this.baseUrl + "/Participant/following?";
+        let url_ = this.baseUrl + "/api/Participant/following?";
         if (userId === null)
             throw new globalThis.Error("The parameter 'userId' cannot be null.");
         else if (userId !== undefined)
@@ -834,11 +911,226 @@ export class Client {
     }
 
     /**
+     * @return OK
+     */
+    tagGET(): Observable<TagDtoIEnumerableApiResponse> {
+        let url_ = this.baseUrl + "/api/Tag";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTagGET(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTagGET(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TagDtoIEnumerableApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TagDtoIEnumerableApiResponse>;
+        }));
+    }
+
+    protected processTagGET(response: HttpResponseBase): Observable<TagDtoIEnumerableApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TagDtoIEnumerableApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    tagPOST(body?: TagDtoRequest | undefined): Observable<TagDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Tag";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTagPOST(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTagPOST(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TagDtoApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TagDtoApiResponse>;
+        }));
+    }
+
+    protected processTagPOST(response: HttpResponseBase): Observable<TagDtoApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TagDtoApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    tagGET2(id: string): Observable<TagDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Tag/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTagGET2(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTagGET2(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TagDtoApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TagDtoApiResponse>;
+        }));
+    }
+
+    protected processTagGET2(response: HttpResponseBase): Observable<TagDtoApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TagDtoApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    tagDELETE(id: string): Observable<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Tag/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTagDELETE(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTagDELETE(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BooleanApiResponse>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BooleanApiResponse>;
+        }));
+    }
+
+    protected processTagDELETE(response: HttpResponseBase): Observable<BooleanApiResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BooleanApiResponse.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param body (optional) 
      * @return OK
      */
     register(body?: RegisterRequest | undefined): Observable<UserDtoApiResponse> {
-        let url_ = this.baseUrl + "/User/register";
+        let url_ = this.baseUrl + "/api/User/register";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -894,7 +1186,7 @@ export class Client {
      * @return OK
      */
     login(body?: LoginRequest | undefined): Observable<LoginResponseApiResponse> {
-        let url_ = this.baseUrl + "/User/login";
+        let url_ = this.baseUrl + "/api/User/login";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -950,7 +1242,7 @@ export class Client {
      * @return OK
      */
     password(body?: ChangePasswordRequest | undefined): Observable<StringApiResponse> {
-        let url_ = this.baseUrl + "/User/password";
+        let url_ = this.baseUrl + "/api/User/password";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1006,7 +1298,7 @@ export class Client {
      * @return OK
      */
     profile(body?: UpdateUserRequest | undefined): Observable<StringApiResponse> {
-        let url_ = this.baseUrl + "/User/profile";
+        let url_ = this.baseUrl + "/api/User/profile";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1061,7 +1353,7 @@ export class Client {
      * @return OK
      */
     me(): Observable<UserDtoApiResponse> {
-        let url_ = this.baseUrl + "/User/me";
+        let url_ = this.baseUrl + "/api/User/me";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1107,6 +1399,110 @@ export class Client {
         }
         return _observableOf(null as any);
     }
+}
+
+export class AiAssistantResponse implements IAiAssistantResponse {
+    success?: boolean;
+    answer?: string | undefined;
+    data?: { [key: string]: any; }[] | undefined;
+    query?: string | undefined;
+    explanation?: string | undefined;
+    errorMessage?: string | undefined;
+    resultCount?: number;
+
+    constructor(data?: IAiAssistantResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.answer = _data["answer"];
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(item);
+            }
+            this.query = _data["query"];
+            this.explanation = _data["explanation"];
+            this.errorMessage = _data["errorMessage"];
+            this.resultCount = _data["resultCount"];
+        }
+    }
+
+    static fromJS(data: any): AiAssistantResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AiAssistantResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["answer"] = this.answer;
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item);
+        }
+        data["query"] = this.query;
+        data["explanation"] = this.explanation;
+        data["errorMessage"] = this.errorMessage;
+        data["resultCount"] = this.resultCount;
+        return data;
+    }
+}
+
+export interface IAiAssistantResponse {
+    success?: boolean;
+    answer?: string | undefined;
+    data?: { [key: string]: any; }[] | undefined;
+    query?: string | undefined;
+    explanation?: string | undefined;
+    errorMessage?: string | undefined;
+    resultCount?: number;
+}
+
+export class AiQueryRequest implements IAiQueryRequest {
+    query!: string;
+
+    constructor(data?: IAiQueryRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.query = _data["query"];
+        }
+    }
+
+    static fromJS(data: any): AiQueryRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AiQueryRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["query"] = this.query;
+        return data;
+    }
+}
+
+export interface IAiQueryRequest {
+    query: string;
 }
 
 export class BooleanApiResponse implements IBooleanApiResponse {
@@ -1205,6 +1601,7 @@ export class CreateEventRequest implements ICreateEventRequest {
     location?: string | undefined;
     capacity?: number | undefined;
     isPublic?: boolean;
+    tags?: string[] | undefined;
 
     constructor(data?: ICreateEventRequest) {
         if (data) {
@@ -1224,6 +1621,11 @@ export class CreateEventRequest implements ICreateEventRequest {
             this.location = _data["location"];
             this.capacity = _data["capacity"];
             this.isPublic = _data["isPublic"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(item);
+            }
         }
     }
 
@@ -1243,6 +1645,11 @@ export class CreateEventRequest implements ICreateEventRequest {
         data["location"] = this.location;
         data["capacity"] = this.capacity;
         data["isPublic"] = this.isPublic;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+                data["tags"].push(item);
+        }
         return data;
     }
 }
@@ -1255,6 +1662,7 @@ export interface ICreateEventRequest {
     location?: string | undefined;
     capacity?: number | undefined;
     isPublic?: boolean;
+    tags?: string[] | undefined;
 }
 
 export class EventDto implements IEventDto {
@@ -1267,6 +1675,7 @@ export class EventDto implements IEventDto {
     location?: string | undefined;
     isPublic?: boolean;
     capacity?: number;
+    tags?: TagDto[] | undefined;
     createdAt?: Date;
     updatedAt?: Date;
 
@@ -1290,6 +1699,11 @@ export class EventDto implements IEventDto {
             this.location = _data["location"];
             this.isPublic = _data["isPublic"];
             this.capacity = _data["capacity"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(TagDto.fromJS(item));
+            }
             this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : undefined as any;
             this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : undefined as any;
         }
@@ -1313,6 +1727,11 @@ export class EventDto implements IEventDto {
         data["location"] = this.location;
         data["isPublic"] = this.isPublic;
         data["capacity"] = this.capacity;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+                data["tags"].push(item ? item.toJSON() : undefined as any);
+        }
         data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : undefined as any;
         data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : undefined as any;
         return data;
@@ -1329,6 +1748,7 @@ export interface IEventDto {
     location?: string | undefined;
     isPublic?: boolean;
     capacity?: number;
+    tags?: TagDto[] | undefined;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -1701,6 +2121,70 @@ export interface IParticipantDtoIEnumerableApiResponse {
     data?: ParticipantDto[] | undefined;
 }
 
+export class ProblemDetails implements IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IProblemDetails) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.type = _data["type"];
+            this.title = _data["title"];
+            this.status = _data["status"];
+            this.detail = _data["detail"];
+            this.instance = _data["instance"];
+        }
+    }
+
+    static fromJS(data: any): ProblemDetails {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemDetails();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["type"] = this.type;
+        data["title"] = this.title;
+        data["status"] = this.status;
+        data["detail"] = this.detail;
+        data["instance"] = this.instance;
+        return data;
+    }
+}
+
+export interface IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
+}
+
 export class RegisterRequest implements IRegisterRequest {
     username?: string | undefined;
     email?: string | undefined;
@@ -1801,6 +2285,178 @@ export interface IStringApiResponse {
     data?: string | undefined;
 }
 
+export class TagDto implements ITagDto {
+    id?: string | undefined;
+    name?: string | undefined;
+
+    constructor(data?: ITagDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): TagDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface ITagDto {
+    id?: string | undefined;
+    name?: string | undefined;
+}
+
+export class TagDtoApiResponse implements ITagDtoApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: TagDto;
+
+    constructor(data?: ITagDtoApiResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.data = _data["data"] ? TagDto.fromJS(_data["data"]) : undefined as any;
+        }
+    }
+
+    static fromJS(data: any): TagDtoApiResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagDtoApiResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["data"] = this.data ? this.data.toJSON() : undefined as any;
+        return data;
+    }
+}
+
+export interface ITagDtoApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: TagDto;
+}
+
+export class TagDtoIEnumerableApiResponse implements ITagDtoIEnumerableApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: TagDto[] | undefined;
+
+    constructor(data?: ITagDtoIEnumerableApiResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(TagDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): TagDtoIEnumerableApiResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagDtoIEnumerableApiResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface ITagDtoIEnumerableApiResponse {
+    success?: boolean;
+    message?: string | undefined;
+    data?: TagDto[] | undefined;
+}
+
+export class TagDtoRequest implements ITagDtoRequest {
+    name?: string | undefined;
+
+    constructor(data?: ITagDtoRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): TagDtoRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new TagDtoRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface ITagDtoRequest {
+    name?: string | undefined;
+}
+
 export class UpdateEventRequest implements IUpdateEventRequest {
     title?: string | undefined;
     description?: string | undefined;
@@ -1809,6 +2465,7 @@ export class UpdateEventRequest implements IUpdateEventRequest {
     location?: string | undefined;
     capacity?: number | undefined;
     isPublic?: boolean;
+    tags?: string[] | undefined;
 
     constructor(data?: IUpdateEventRequest) {
         if (data) {
@@ -1828,6 +2485,11 @@ export class UpdateEventRequest implements IUpdateEventRequest {
             this.location = _data["location"];
             this.capacity = _data["capacity"];
             this.isPublic = _data["isPublic"];
+            if (Array.isArray(_data["tags"])) {
+                this.tags = [] as any;
+                for (let item of _data["tags"])
+                    this.tags!.push(item);
+            }
         }
     }
 
@@ -1847,6 +2509,11 @@ export class UpdateEventRequest implements IUpdateEventRequest {
         data["location"] = this.location;
         data["capacity"] = this.capacity;
         data["isPublic"] = this.isPublic;
+        if (Array.isArray(this.tags)) {
+            data["tags"] = [];
+            for (let item of this.tags)
+                data["tags"].push(item);
+        }
         return data;
     }
 }
@@ -1859,6 +2526,7 @@ export interface IUpdateEventRequest {
     location?: string | undefined;
     capacity?: number | undefined;
     isPublic?: boolean;
+    tags?: string[] | undefined;
 }
 
 export class UpdateUserRequest implements IUpdateUserRequest {

@@ -100,6 +100,25 @@ namespace Infrastructure.Migrations
                     b.ToTable("participants", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Persistence.Entity.TagEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("tags", (string)null);
+                });
+
             modelBuilder.Entity("Infrastructure.Persistence.Entity.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -145,6 +164,21 @@ namespace Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("event_tags", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EventId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("event_tags", (string)null);
+                });
+
             modelBuilder.Entity("Infrastructure.Persistence.Entity.EventEntity", b =>
                 {
                     b.HasOne("Infrastructure.Persistence.Entity.UserEntity", "Organizer")
@@ -173,6 +207,21 @@ namespace Infrastructure.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("event_tags", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entity.EventEntity", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Persistence.Entity.TagEntity", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entity.EventEntity", b =>

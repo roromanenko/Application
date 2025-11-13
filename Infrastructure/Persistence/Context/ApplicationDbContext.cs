@@ -13,6 +13,7 @@ namespace Infrastructure.Persistence
 		public DbSet<UserEntity> Users { get; set; }
 		public DbSet<EventEntity> Events { get; set; }
 		public DbSet<ParticipantEntity> Participants { get; set; }
+		public DbSet<TagEntity> Tags { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

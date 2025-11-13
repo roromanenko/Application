@@ -23,6 +23,8 @@ services:
         value: https://organiza-backend-3427.onrender.com
       - key: FrontendUrl
         value: https://YOUR-FRONTEND-URL.onrender.com
+      - key: Groq__ApiKey
+        sync: false
     healthCheckPath: /health
 
   # Frontend Service
